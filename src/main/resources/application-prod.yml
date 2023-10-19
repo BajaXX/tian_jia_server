@@ -1,0 +1,89 @@
+server:
+  port: 8092
+spring:
+  #        maxFileSize: 30MB
+  #        maxRequestSize: 30MB
+  datasource:
+    #    url: jdbc:mysql://52.83.217.121/enterprise?useUnicode=true&characterEncoding=UTF-8
+#    url: jdbc:mysql://127.0.0.1:3306/enterprise?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai&zeroDateTimeBehavior=convertToNull
+    url: jdbc:mysql://127.0.0.1:3306/enterprise?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai&zeroDateTimeBehavior=convertToNull
+
+
+    username: root
+    password: u83g/4sgyuytr
+#    password: ZHa0CE1342$dfEr4d45ef1cba
+    driverClassName: com.mysql.cj.jdbc.Driver
+    hikari:
+      max-lifetime: 120000
+  jpa:
+    database: MYSQL
+    show-sql: false
+    hibernate:
+      ddl-auto: none
+      naming:
+        strategy: org.hibernate.cfg.ImprovedNamingStrategy
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL5Dialect
+  cache:
+    type: ehcache
+  application:
+    name: xuhui
+  servlet:
+    multipart:
+      enabled: true
+logging:
+  config: classpath:log4j2.xml
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+mybatis-plus:
+  mapper-locations: classpath:mapping/*.xml
+  type-aliases-package: com.bemore.api.entity
+  configuration:
+    map-underscore-to-camel-case: true
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl #开启sql日志
+#file:
+#  save:
+##    pdfFileDir:  e:\\image\\${application.name}\\pdf\\
+##    idCardFileDir:  e:\\image\\${application.name}\\idCard\\
+##    bizFileDir:  e:\\image\\${application.name}\\bizFile\\
+##    docFileDir:  e:\\image\\${application.name}\\docFileDir\\
+#    pdfFileDir:  /var/www/html/pdf/
+#    idCardUrl:  http://52.82.29.121:8091/idcard/
+#    idCardFileDir:  /var/www/html/idcard/
+#    bizFileDir:  /var/www/html/biz/
+#    bizFileUrl:  http://52.82.29.121:8091/biz/
+#    docFileDir:  /var/www/html/doc/
+ocr:
+  config:
+    secretId: AKIDVpkOmumNhkW0D9oCI7lBMPMAlBUZOwEE
+    secretKey: lFSR9bmhLinc9QQ9esoTs0tVrwkHWWFg
+    endPoint: ocr.tencentcloudapi.com
+    region: ap-shanghai
+
+sms:
+  config:
+    appKey: 204034308
+    appSecret: Z4aUdcDgkzJdY2EzWdMl4SqrXG4MaeYi
+    appCode: 7a024e57b2404c2ab82f6114b39d87bb
+
+account:
+  defaultPwd: 123456
+
+file:
+  save:
+    pdfFileDir: /data/html/file/pdf/
+    idCardUrl: http://system.yrdfp.com:8090/file/idcard/
+    idCardFileDir: /data/html/file/idcard/
+    bizFileDir: /data/html/file/biz/
+    bizFileUrl: http://system.yrdfp.com:8090/file/biz/
+    docFileDir: /data/html/file/doc/
+company:
+  # 企業相關文檔存放路徑 路徑格式：basePath/流轉過程code/企業類型code/文件名
+  doc: /data/java/template

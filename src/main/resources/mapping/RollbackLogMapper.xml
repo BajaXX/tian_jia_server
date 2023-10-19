@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bemore.api.dao.mapper.RollbackLogMapper">
+    <select id="selectNewestRollbackLog" resultType="com.bemore.api.entity.RollbackLog">
+        SELECT * FROM t_rollback_log ORDER BY year DESC,month DESC limit 1
+    </select>
+</mapper>

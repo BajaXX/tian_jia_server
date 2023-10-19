@@ -1,0 +1,504 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bemore.api.dao.mapper.TEnterpriseMemberMapper">
+  <resultMap id="BaseResultMap" type="com.bemore.api.entity.Member">
+    <id column="id" jdbcType="VARCHAR" property="id" />
+    <result column="enterprise_id" jdbcType="VARCHAR" property="enterpriseId" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="sex" jdbcType="VARCHAR" property="sex" />
+    <result column="country" jdbcType="VARCHAR" property="country" />
+    <result column="nation" jdbcType="VARCHAR" property="nation" />
+    <result column="type" jdbcType="VARCHAR" property="type" />
+    <result column="idcard" jdbcType="VARCHAR" property="idcard" />
+    <result column="birthday" jdbcType="VARCHAR" property="birthday" />
+    <result column="authority" jdbcType="VARCHAR" property="authority" />
+    <result column="start_date" jdbcType="VARCHAR" property="startDate" />
+    <result column="end_date" jdbcType="VARCHAR" property="endDate" />
+    <result column="office_phone" jdbcType="VARCHAR" property="officePhone" />
+    <result column="office_fax" jdbcType="VARCHAR" property="officeFax" />
+    <result column="office_address" jdbcType="VARCHAR" property="officeAddress" />
+    <result column="office_zipcode" jdbcType="VARCHAR" property="officeZipcode" />
+    <result column="mobile" jdbcType="VARCHAR" property="mobile" />
+    <result column="phone" jdbcType="VARCHAR" property="phone" />
+    <result column="address" jdbcType="VARCHAR" property="address" />
+    <result column="zipcode" jdbcType="VARCHAR" property="zipcode" />
+    <result column="email" jdbcType="VARCHAR" property="email" />
+    <result column="memo" jdbcType="VARCHAR" property="memo" />
+    <result column="front" jdbcType="VARCHAR" property="front" />
+    <result column="back" jdbcType="VARCHAR" property="back" />
+    <result column="is_stock" jdbcType="TINYINT" property="isStock" />
+    <result column="is_old_stock" jdbcType="TINYINT" property="isOldStock" />
+    <result column="is_supervisor" jdbcType="TINYINT" property="isSupervisor" />
+    <result column="is_old_supervisor" jdbcType="TINYINT" property="isOldSupervisor" />
+    <result column="is_director" jdbcType="TINYINT" property="isDirector" />
+    <result column="is_old_director" jdbcType="TINYINT" property="isOldDirector" />
+    <result column="old_put_type" jdbcType="VARCHAR" property="oldPutType" />
+    <result column="put_type" jdbcType="VARCHAR" property="putType" />
+    <result column="old_put_amount" jdbcType="VARCHAR" property="oldPutAmount" />
+    <result column="put_amount" jdbcType="VARCHAR" property="putAmount" />
+    <result column="real_put_amount" jdbcType="VARCHAR" property="realPutAmount" />
+    <result column="put_date" jdbcType="VARCHAR" property="putDate" />
+    <result column="old_put_date" jdbcType="VARCHAR" property="oldPutDate" />
+    <result column="real_put_date" jdbcType="VARCHAR" property="realPutDate" />
+    <result column="supervisor_type" jdbcType="VARCHAR" property="supervisorType" />
+    <result column="director_type" jdbcType="VARCHAR" property="directorType" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, enterprise_id, `name`, sex, country, nation, `type`, idcard, birthday, authority, 
+    start_date, end_date, office_phone, office_fax, office_address, office_zipcode, mobile, 
+    phone, address, zipcode, email, memo, front, back, is_stock, is_old_stock, is_supervisor, 
+    is_old_supervisor, is_director, is_old_director, old_put_type, put_type, old_put_amount, 
+    put_amount, real_put_amount, put_date, old_put_date, real_put_date, supervisor_type, 
+    director_type
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_enterprise_member
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+    delete from t_enterprise_member
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.bemore.api.entity.Member" useGeneratedKeys="true">
+    insert into t_enterprise_member (enterprise_id, `name`, sex,
+      country, nation, `type`,
+      idcard, birthday, authority,
+      start_date, end_date, office_phone,
+      office_fax, office_address, office_zipcode,
+      mobile, phone, address,
+      zipcode, email, memo,
+      front, back, is_stock,
+      is_old_stock, is_supervisor, is_old_supervisor,
+      is_director, is_old_director, old_put_type,
+      put_type, old_put_amount, put_amount,
+      real_put_amount, put_date, old_put_date,
+      real_put_date, supervisor_type, director_type
+      )
+    values (#{enterpriseId,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{sex,jdbcType=VARCHAR},
+      #{country,jdbcType=VARCHAR}, #{nation,jdbcType=VARCHAR}, #{type,jdbcType=VARCHAR},
+      #{idcard,jdbcType=VARCHAR}, #{birthday,jdbcType=VARCHAR}, #{authority,jdbcType=VARCHAR},
+      #{startDate,jdbcType=VARCHAR}, #{endDate,jdbcType=VARCHAR}, #{officePhone,jdbcType=VARCHAR},
+      #{officeFax,jdbcType=VARCHAR}, #{officeAddress,jdbcType=VARCHAR}, #{officeZipcode,jdbcType=VARCHAR},
+      #{mobile,jdbcType=VARCHAR}, #{phone,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR},
+      #{zipcode,jdbcType=VARCHAR}, #{email,jdbcType=VARCHAR}, #{memo,jdbcType=VARCHAR},
+      #{front,jdbcType=VARCHAR}, #{back,jdbcType=VARCHAR}, #{isStock,jdbcType=TINYINT},
+      #{isOldStock,jdbcType=TINYINT}, #{isSupervisor,jdbcType=TINYINT}, #{isOldSupervisor,jdbcType=TINYINT},
+      #{isDirector,jdbcType=TINYINT}, #{isOldDirector,jdbcType=TINYINT}, #{oldPutType,jdbcType=VARCHAR},
+      #{putType,jdbcType=VARCHAR}, #{oldPutAmount,jdbcType=VARCHAR}, #{putAmount,jdbcType=VARCHAR},
+      #{realPutAmount,jdbcType=VARCHAR}, #{putDate,jdbcType=VARCHAR}, #{oldPutDate,jdbcType=VARCHAR},
+      #{realPutDate,jdbcType=VARCHAR}, #{supervisorType,jdbcType=VARCHAR}, #{directorType,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.bemore.api.entity.Member" useGeneratedKeys="true">
+    insert into t_enterprise_member
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="enterpriseId != null">
+        enterprise_id,
+      </if>
+      <if test="name != null">
+        `name`,
+      </if>
+      <if test="sex != null">
+        sex,
+      </if>
+      <if test="country != null">
+        country,
+      </if>
+      <if test="nation != null">
+        nation,
+      </if>
+      <if test="type != null">
+        `type`,
+      </if>
+      <if test="idcard != null">
+        idcard,
+      </if>
+      <if test="birthday != null">
+        birthday,
+      </if>
+      <if test="authority != null">
+        authority,
+      </if>
+      <if test="startDate != null">
+        start_date,
+      </if>
+      <if test="endDate != null">
+        end_date,
+      </if>
+      <if test="officePhone != null">
+        office_phone,
+      </if>
+      <if test="officeFax != null">
+        office_fax,
+      </if>
+      <if test="officeAddress != null">
+        office_address,
+      </if>
+      <if test="officeZipcode != null">
+        office_zipcode,
+      </if>
+      <if test="mobile != null">
+        mobile,
+      </if>
+      <if test="phone != null">
+        phone,
+      </if>
+      <if test="address != null">
+        address,
+      </if>
+      <if test="zipcode != null">
+        zipcode,
+      </if>
+      <if test="email != null">
+        email,
+      </if>
+      <if test="memo != null">
+        memo,
+      </if>
+      <if test="front != null">
+        front,
+      </if>
+      <if test="back != null">
+        back,
+      </if>
+      <if test="isStock != null">
+        is_stock,
+      </if>
+      <if test="isOldStock != null">
+        is_old_stock,
+      </if>
+      <if test="isSupervisor != null">
+        is_supervisor,
+      </if>
+      <if test="isOldSupervisor != null">
+        is_old_supervisor,
+      </if>
+      <if test="isDirector != null">
+        is_director,
+      </if>
+      <if test="isOldDirector != null">
+        is_old_director,
+      </if>
+      <if test="oldPutType != null">
+        old_put_type,
+      </if>
+      <if test="putType != null">
+        put_type,
+      </if>
+      <if test="oldPutAmount != null">
+        old_put_amount,
+      </if>
+      <if test="putAmount != null">
+        put_amount,
+      </if>
+      <if test="realPutAmount != null">
+        real_put_amount,
+      </if>
+      <if test="putDate != null">
+        put_date,
+      </if>
+      <if test="oldPutDate != null">
+        old_put_date,
+      </if>
+      <if test="realPutDate != null">
+        real_put_date,
+      </if>
+      <if test="supervisorType != null">
+        supervisor_type,
+      </if>
+      <if test="directorType != null">
+        director_type,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="enterpriseId != null">
+        #{enterpriseId,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="sex != null">
+        #{sex,jdbcType=VARCHAR},
+      </if>
+      <if test="country != null">
+        #{country,jdbcType=VARCHAR},
+      </if>
+      <if test="nation != null">
+        #{nation,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null">
+        #{type,jdbcType=VARCHAR},
+      </if>
+      <if test="idcard != null">
+        #{idcard,jdbcType=VARCHAR},
+      </if>
+      <if test="birthday != null">
+        #{birthday,jdbcType=VARCHAR},
+      </if>
+      <if test="authority != null">
+        #{authority,jdbcType=VARCHAR},
+      </if>
+      <if test="startDate != null">
+        #{startDate,jdbcType=VARCHAR},
+      </if>
+      <if test="endDate != null">
+        #{endDate,jdbcType=VARCHAR},
+      </if>
+      <if test="officePhone != null">
+        #{officePhone,jdbcType=VARCHAR},
+      </if>
+      <if test="officeFax != null">
+        #{officeFax,jdbcType=VARCHAR},
+      </if>
+      <if test="officeAddress != null">
+        #{officeAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="officeZipcode != null">
+        #{officeZipcode,jdbcType=VARCHAR},
+      </if>
+      <if test="mobile != null">
+        #{mobile,jdbcType=VARCHAR},
+      </if>
+      <if test="phone != null">
+        #{phone,jdbcType=VARCHAR},
+      </if>
+      <if test="address != null">
+        #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="zipcode != null">
+        #{zipcode,jdbcType=VARCHAR},
+      </if>
+      <if test="email != null">
+        #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="memo != null">
+        #{memo,jdbcType=VARCHAR},
+      </if>
+      <if test="front != null">
+        #{front,jdbcType=VARCHAR},
+      </if>
+      <if test="back != null">
+        #{back,jdbcType=VARCHAR},
+      </if>
+      <if test="isStock != null">
+        #{isStock,jdbcType=TINYINT},
+      </if>
+      <if test="isOldStock != null">
+        #{isOldStock,jdbcType=TINYINT},
+      </if>
+      <if test="isSupervisor != null">
+        #{isSupervisor,jdbcType=TINYINT},
+      </if>
+      <if test="isOldSupervisor != null">
+        #{isOldSupervisor,jdbcType=TINYINT},
+      </if>
+      <if test="isDirector != null">
+        #{isDirector,jdbcType=TINYINT},
+      </if>
+      <if test="isOldDirector != null">
+        #{isOldDirector,jdbcType=TINYINT},
+      </if>
+      <if test="oldPutType != null">
+        #{oldPutType,jdbcType=VARCHAR},
+      </if>
+      <if test="putType != null">
+        #{putType,jdbcType=VARCHAR},
+      </if>
+      <if test="oldPutAmount != null">
+        #{oldPutAmount,jdbcType=VARCHAR},
+      </if>
+      <if test="putAmount != null">
+        #{putAmount,jdbcType=VARCHAR},
+      </if>
+      <if test="realPutAmount != null">
+        #{realPutAmount,jdbcType=VARCHAR},
+      </if>
+      <if test="putDate != null">
+        #{putDate,jdbcType=VARCHAR},
+      </if>
+      <if test="oldPutDate != null">
+        #{oldPutDate,jdbcType=VARCHAR},
+      </if>
+      <if test="realPutDate != null">
+        #{realPutDate,jdbcType=VARCHAR},
+      </if>
+      <if test="supervisorType != null">
+        #{supervisorType,jdbcType=VARCHAR},
+      </if>
+      <if test="directorType != null">
+        #{directorType,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.bemore.api.entity.Member">
+    update t_enterprise_member
+    <set>
+      <if test="enterpriseId != null">
+        enterprise_id = #{enterpriseId,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        `name` = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="sex != null">
+        sex = #{sex,jdbcType=VARCHAR},
+      </if>
+      <if test="country != null">
+        country = #{country,jdbcType=VARCHAR},
+      </if>
+      <if test="nation != null">
+        nation = #{nation,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null">
+        `type` = #{type,jdbcType=VARCHAR},
+      </if>
+      <if test="idcard != null">
+        idcard = #{idcard,jdbcType=VARCHAR},
+      </if>
+      <if test="birthday != null">
+        birthday = #{birthday,jdbcType=VARCHAR},
+      </if>
+      <if test="authority != null">
+        authority = #{authority,jdbcType=VARCHAR},
+      </if>
+      <if test="startDate != null">
+        start_date = #{startDate,jdbcType=VARCHAR},
+      </if>
+      <if test="endDate != null">
+        end_date = #{endDate,jdbcType=VARCHAR},
+      </if>
+      <if test="officePhone != null">
+        office_phone = #{officePhone,jdbcType=VARCHAR},
+      </if>
+      <if test="officeFax != null">
+        office_fax = #{officeFax,jdbcType=VARCHAR},
+      </if>
+      <if test="officeAddress != null">
+        office_address = #{officeAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="officeZipcode != null">
+        office_zipcode = #{officeZipcode,jdbcType=VARCHAR},
+      </if>
+      <if test="mobile != null">
+        mobile = #{mobile,jdbcType=VARCHAR},
+      </if>
+      <if test="phone != null">
+        phone = #{phone,jdbcType=VARCHAR},
+      </if>
+      <if test="address != null">
+        address = #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="zipcode != null">
+        zipcode = #{zipcode,jdbcType=VARCHAR},
+      </if>
+      <if test="email != null">
+        email = #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="memo != null">
+        memo = #{memo,jdbcType=VARCHAR},
+      </if>
+      <if test="front != null">
+        front = #{front,jdbcType=VARCHAR},
+      </if>
+      <if test="back != null">
+        back = #{back,jdbcType=VARCHAR},
+      </if>
+      <if test="isStock != null">
+        is_stock = #{isStock,jdbcType=TINYINT},
+      </if>
+      <if test="isOldStock != null">
+        is_old_stock = #{isOldStock,jdbcType=TINYINT},
+      </if>
+      <if test="isSupervisor != null">
+        is_supervisor = #{isSupervisor,jdbcType=TINYINT},
+      </if>
+      <if test="isOldSupervisor != null">
+        is_old_supervisor = #{isOldSupervisor,jdbcType=TINYINT},
+      </if>
+      <if test="isDirector != null">
+        is_director = #{isDirector,jdbcType=TINYINT},
+      </if>
+      <if test="isOldDirector != null">
+        is_old_director = #{isOldDirector,jdbcType=TINYINT},
+      </if>
+      <if test="oldPutType != null">
+        old_put_type = #{oldPutType,jdbcType=VARCHAR},
+      </if>
+      <if test="putType != null">
+        put_type = #{putType,jdbcType=VARCHAR},
+      </if>
+      <if test="oldPutAmount != null">
+        old_put_amount = #{oldPutAmount,jdbcType=VARCHAR},
+      </if>
+      <if test="putAmount != null">
+        put_amount = #{putAmount,jdbcType=VARCHAR},
+      </if>
+      <if test="realPutAmount != null">
+        real_put_amount = #{realPutAmount,jdbcType=VARCHAR},
+      </if>
+      <if test="putDate != null">
+        put_date = #{putDate,jdbcType=VARCHAR},
+      </if>
+      <if test="oldPutDate != null">
+        old_put_date = #{oldPutDate,jdbcType=VARCHAR},
+      </if>
+      <if test="realPutDate != null">
+        real_put_date = #{realPutDate,jdbcType=VARCHAR},
+      </if>
+      <if test="supervisorType != null">
+        supervisor_type = #{supervisorType,jdbcType=VARCHAR},
+      </if>
+      <if test="directorType != null">
+        director_type = #{directorType,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.bemore.api.entity.Member">
+    update t_enterprise_member
+    set enterprise_id = #{enterpriseId,jdbcType=VARCHAR},
+      `name` = #{name,jdbcType=VARCHAR},
+      sex = #{sex,jdbcType=VARCHAR},
+      country = #{country,jdbcType=VARCHAR},
+      nation = #{nation,jdbcType=VARCHAR},
+      `type` = #{type,jdbcType=VARCHAR},
+      idcard = #{idcard,jdbcType=VARCHAR},
+      birthday = #{birthday,jdbcType=VARCHAR},
+      authority = #{authority,jdbcType=VARCHAR},
+      start_date = #{startDate,jdbcType=VARCHAR},
+      end_date = #{endDate,jdbcType=VARCHAR},
+      office_phone = #{officePhone,jdbcType=VARCHAR},
+      office_fax = #{officeFax,jdbcType=VARCHAR},
+      office_address = #{officeAddress,jdbcType=VARCHAR},
+      office_zipcode = #{officeZipcode,jdbcType=VARCHAR},
+      mobile = #{mobile,jdbcType=VARCHAR},
+      phone = #{phone,jdbcType=VARCHAR},
+      address = #{address,jdbcType=VARCHAR},
+      zipcode = #{zipcode,jdbcType=VARCHAR},
+      email = #{email,jdbcType=VARCHAR},
+      memo = #{memo,jdbcType=VARCHAR},
+      front = #{front,jdbcType=VARCHAR},
+      back = #{back,jdbcType=VARCHAR},
+      is_stock = #{isStock,jdbcType=TINYINT},
+      is_old_stock = #{isOldStock,jdbcType=TINYINT},
+      is_supervisor = #{isSupervisor,jdbcType=TINYINT},
+      is_old_supervisor = #{isOldSupervisor,jdbcType=TINYINT},
+      is_director = #{isDirector,jdbcType=TINYINT},
+      is_old_director = #{isOldDirector,jdbcType=TINYINT},
+      old_put_type = #{oldPutType,jdbcType=VARCHAR},
+      put_type = #{putType,jdbcType=VARCHAR},
+      old_put_amount = #{oldPutAmount,jdbcType=VARCHAR},
+      put_amount = #{putAmount,jdbcType=VARCHAR},
+      real_put_amount = #{realPutAmount,jdbcType=VARCHAR},
+      put_date = #{putDate,jdbcType=VARCHAR},
+      old_put_date = #{oldPutDate,jdbcType=VARCHAR},
+      real_put_date = #{realPutDate,jdbcType=VARCHAR},
+      supervisor_type = #{supervisorType,jdbcType=VARCHAR},
+      director_type = #{directorType,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <select id="getMasterInfo" resultType="com.bemore.api.dto.EnterpriseMasterInfoDto">
+    select  m.name,m.address,m.put_type,m.put_amount from t_enterprise_member m inner join  t_enterprise_person p on m.enterprise_id = p.enterprise_id where m.is_stock=1 and m.enterprise_id=#{enterpriseId} limit 1
+  </select>
+</mapper>

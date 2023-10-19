@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.1.4.RELEASE</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+    <groupId>com.bemore</groupId>
+    <artifactId>api</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>api</name>
+    <description>bemore server api</description>
+
+    <properties>
+        <java.version>1.8</java.version>
+        <mybatis-plus-version>3.4.3.4</mybatis-plus-version>
+        <hutool-version>5.7.17</hutool-version>
+        <skipTests>true</skipTests>
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>dev</id>
+            <properties>
+                <profileActive>dev</profileActive>
+            </properties>
+
+        </profile>
+        <profile>
+            <id>prod</id>
+            <properties>
+                <profileActive>prod</profileActive>
+            </properties>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
+    </profiles>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-log4j2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cache</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.tencentcloudapi</groupId>
+            <artifactId>tencentcloud-sdk-java</artifactId>
+            <!--			<version>3.1.322</version>-->
+            <version>3.1.538</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.ehcache</groupId>
+            <artifactId>ehcache</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <scope>runtime</scope>
+            <version>8.0.25</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt</artifactId>
+            <version>0.9.1</version>
+        </dependency>
+        <!--		<dependency>-->
+        <!--			<groupId>org.mybatis.spring.boot</groupId>-->
+        <!--			<artifactId>mybatis-spring-boot-starter</artifactId>-->
+        <!--			<version>2.1.4</version>-->
+        <!--		</dependency>-->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <version>${mybatis-plus-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+            <version>2.6.1</version>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger-ui</artifactId>
+            <version>2.6.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>3.9.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.8</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>e-iceblue</groupId>
+            <artifactId>spire.office.free</artifactId>
+            <version>3.9.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/lib/Spire.Office.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.bizcloud.ipaas.tb449ed34961d4e798e2dc60eba4e8b47.pdpwzyvy</groupId>
+            <artifactId>ipaas-java-sdk-66ba3522-00ba-4fdf-b96e-823a59dae31d</artifactId>
+            <version>1.0.0.20220506115214-SNAPSHOT</version>
+            <systemPath>
+                ${basedir}/lib/ipaas-java-sdk-66ba3522-00ba-4fdf-b96e-823a59dae31d-1.0.0.20220506115214-SNAPSHOT.jar
+            </systemPath>
+            <scope>system</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.bizcloud.ipaas.tb449ed34961d4e798e2dc60eba4e8b47.khslbkyg</groupId>
+            <artifactId>ipaas-java-sdk-31e7152e-9858-42d9-a1ef-d87310f365d0</artifactId>
+            <version>1.0.0.20220519162522-SNAPSHOT</version>
+            <systemPath>
+                ${basedir}/lib/ipaas-java-sdk-31e7152e-9858-42d9-a1ef-d87310f365d0-1.0.0.20220519162522-SNAPSHOT.jar
+            </systemPath>
+            <scope>system</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.bizcloud.ipaas.tb449ed34961d4e798e2dc60eba4e8b47.vidyxcdq</groupId>
+            <artifactId>ipaas-java-sdk-e8553b66-2f2a-4dab-9807-931dea95db5b</artifactId>
+            <version>1.0.0.20220519182113-SNAPSHOT</version>
+            <systemPath>
+                ${basedir}/lib/ipaas-java-sdk-e8553b66-2f2a-4dab-9807-931dea95db5b-1.0.0.20220519182113-SNAPSHOT.jar
+            </systemPath>
+            <scope>system</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.gsonfire</groupId>
+            <artifactId>gson-fire</artifactId>
+            <version>1.8.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.78</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>4.1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>4.1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml-schemas</artifactId>
+            <version>4.1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>ooxml-schemas</artifactId>
+            <version>1.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-scratchpad</artifactId>
+            <version>4.1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.6</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>${hutool-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+            <version>4.2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <version>2.1.4.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>2.9.9</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>garden</finalName>
+        <plugins>
+            <!-- Srping Boot 打包工具 -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <includeSystemScope>true</includeSystemScope>
+                    <skipTests>true</skipTests>
+                </configuration>
+
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+    <!--	<repositories>-->
+    <!--		<repository>-->
+    <!--			<id>aliyun-repos</id>-->
+    <!--			<url>https://maven.aliyun.com/nexus/content/groups/public/</url>-->
+    <!--			<snapshots>-->
+    <!--				<enabled>false</enabled>-->
+    <!--			</snapshots>-->
+    <!--		</repository>-->
+    <!--	</repositories>-->
+    <!--	<pluginRepositories>-->
+    <!--		<pluginRepository>-->
+    <!--			<id>aliyun-plugin</id>-->
+    <!--			<url>https://maven.aliyun.com/nexus/content/groups/public/</url>-->
+    <!--			<snapshots>-->
+    <!--				<enabled>false</enabled>-->
+    <!--			</snapshots>-->
+    <!--		</pluginRepository>-->
+    <!--	</pluginRepositories>-->
+
+
+</project>

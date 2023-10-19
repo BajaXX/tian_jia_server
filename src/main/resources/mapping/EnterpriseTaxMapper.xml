@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bemore.api.dao.mapper.EnterpriseTaxMapper">
+    <select id="selectNewestTaxMonth" resultType="com.bemore.api.entity.EnterpriseTaxPlus">
+        SELECT year,month FROM enterprise.t_enterprise_tax ORDER BY year DESC,month DESC limit 1
+    </select>
+
+    <select id="selectNewTaxAccount" resultType="com.bemore.api.entity.EnterpriseTaxPlus">
+        SELECT enterprise_name,date,found_date,year,month,total_tax,total_tax_total
+        FROM t_enterprise_tax
+        WHERE enterprise_name in (SELECT enterprise_name FROM t_enterprise_tax WHERE date &lt; #{queryDate} AND date >= '2020-01' GROUP BY enterprise_name HAVING sum(total_tax) = 0)
+        AND date = #{queryDate}
+        AND total_tax_total > 0
+        ORDER BY year,month;
+    </select>
+
+    <select id="selectNewValidAccountList" resultType="com.bemore.api.entity.EnterpriseTaxPlus">
+        SELECT enterprise_name,date,found_date,year,month,total_tax,total_tax_total
+        FROM t_enterprise_tax
+        WHERE enterprise_name in (SELECT enterprise_name FROM t_enterprise_tax WHERE date &lt; #{queryDate} AND date >= '2020-01' GROUP BY enterprise_name HAVING sum(total_tax) &lt;= 1000)
+          AND date = #{queryDate}
+          AND total_tax_total >= 1000
+        ORDER BY year,month;
+    </select>
+    <select id="selectTotalTaxByName" resultType="java.lang.Double">
+        select sum(t.total_tax) as total_tax from t_enterprise_tax t where enterprise_name=#{enterpriseName} and date &lt;= #{queryDate} and date>='2020-01'
+    </select>
+</mapper>

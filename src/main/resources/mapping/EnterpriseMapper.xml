@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bemore.api.dao.mapper.EnterpriseMapper">
+
+
+  <select id="getEnterprise" resultType="com.bemore.api.entity.Enterprise">
+    select e.* from t_enterprise e
+    limit #{limit} offset #{offset}
+    <where>
+      <if test="basic.enterpriseNo !=null and basic.enterpriseNo!=''">
+        and e.enterprise_no=#{basic.enterpriseNo}
+      </if>
+      <if test="basic.registerNum !=null and basic.registerNum!=''">
+        and e.register_num=#{basic.registerNum}
+      </if>
+      <if test="basic.name !=null and basic.name!=''">
+        and e.name like concat('%',#{basic.name},'%')
+      </if>
+      <if test="basic.enterpriseWordNo !=null and basic.enterpriseWordNo!=''">
+        and e.enterprise_word_no = #{basic.name}
+      </if>
+      <if test="basic.registerAddress !=null and basic.registerAddress!=''">
+        and e.register_address = #{basic.registerAddress}
+      </if>
+      <if test="basic.actContactAddress !=null and basic.actContactAddress!=''">
+        and e.act_contact_address = #{basic.actContactAddress}
+      </if>
+      <if test="basic.source !=null and basic.source!=''">
+        and e.source like concat('%',#{basic.source},'%')
+      </if>
+      <if test="basic.introducer !=null and basic.introducer!=''">
+        and e.introducer = #{basic.introducer}
+      </if>
+      <if test="basic.thisRegion !=null and basic.thisRegion!=''">
+        and e.this_region = #{basic.thisRegion}
+      </if>
+      <if test="basic.follower !=null and basic.follower !=''">
+        and e.follower like concat('%',#{basic.follower},'%')
+      </if>
+      <if test="business.process !=null">
+        and e.process = #{basic.process}
+      </if>
+      <if test="business.belongIndustry !=null and business.belongIndustry!=''">
+        and e.belong_industry = #{basic.belongIndustry}
+      </if>
+      <if test="business.business !=null and business.business!=''">
+        and e.business = #{basic.business}
+      </if>
+      <if test="business.motherCompany !=null and business.motherCompany!=''">
+        and e.mother_company = #{basic.motherCompany}
+      </if>
+      <if test="business.startDateStart !=null and business.startDateEnd!=null">
+        and str_to_date(e.start_date,'%Y-%m-%d') <![CDATA[>=]]> #{basic.startDateStart}
+        and str_to_date(e.start_date,'%Y-%m-%d')<![CDATA[<]]> #{basic.startDateEnd}
+      </if>
+      <if test="business.endDateStart !=null and business.endDateEnd!=null">
+        and str_to_date(e.end_date,'%Y-%m-%d') <![CDATA[>=]]> #{basic.endDateStart}
+        and str_to_date(e.end_date,'%Y-%m-%d')<![CDATA[<]]> #{basic.endDateEnd}
+      </if>
+
+      <if test="basic.financeName !=null and basic.financeName!=''">
+        and exists (select date from t_enterprise_person ep  where ep.enterprise_id=e.id and ep.name like concat('%',#{basic.financeName},'%') and ep.is_finance=1
+      </if>
+      <if test="basic.financePhone !=null and basic.financePhone!=''">
+        and exists (select date from t_enterprise_person ep  where ep.enterprise_id=e.id and ep.phone =#{basic.financePhone} and ep.is_finance=1
+      </if>
+      <if test="basic.masterName !=null and basic.masterName!=''">
+        and exists (select date from t_enterprise_person ep  where ep.enterprise_id=e.id and ep.name like concat('%',#{basic.masterName},'%') and ep.is_master=1
+      </if>
+      <if test="basic.masterPhone !=null and basic.masterPhone!=''">
+        and exists (select date from t_enterprise_person ep  where ep.enterprise_id=e.id and ep.phone =#{basic.masterPhone} and ep.is_master=1
+      </if>
+      <if test="basic.masterAddress !=null and basic.masterAddress!=''">
+        and exists (select date from t_enterprise_person ep  where ep.enterprise_id=e.id and ep.address =#{basic.masterAddress} and ep.is_master=1
+      </if>
+      <if test="basic.masterIdCard !=null and basic.masterIdCard!=''">
+        and exists (select date from t_enterprise_person ep  where ep.enterprise_id=e.id and ep.idcard =#{basic.masterIdCard} and ep.is_master=1
+      </if>
+      <if test="basic.settledDateStart !=null and basic.settledDateEnd!=null">
+        and  #{basic.settledDateStart} <![CDATA[>=]]> str_to_date((select es.create_time from t_enterprise_settled es where e.name=es.enterprise_name limit 1),'%Y-%m-%d')
+        and #{basic.settledDateEnd} <![CDATA[<]]> str_to_date((select es.create_time from t_enterprise_settled es where e.name=es.enterprise_name limit 1),'%Y-%m-%d')
+      </if>
+
+      <if test="tax.taxTotalStart !=null and tax.taxTotalEnd!=null">
+        and exists (select date from t_enterprise_tax et where e.name=et.enterprise_name and str_to_date(et.`date`,'%Y-%m') <![CDATA[>=]]> tax.taxTotalStart and str_to_date(et.`date`,'%Y-%m') <![CDATA[<]]> tax.taxTotalEnd
+      </if>
+
+      <if test="tax.thanTaxTotal !=null and tax.lessTaxTotal!=''">
+        and exists (select date from t_enterprise_tax et where e.name=et.enterprise_name and et.total_tax_total <![CDATA[>=]]> tax.thanTaxTotal and et.total_tax_total <![CDATA[<]]> tax.lessTaxTotal
+      </if>
+
+    </where>
+  </select>
+
+
+  <select id="getEnterpriseCount" resultType="int">
+    select count(*) from t_enterprise e
+    <where>
+      <if test="basic.enterpriseNo !=null and basic.enterpriseNo!=''">
+        and e.enterprise_no=#{basic.enterpriseNo}
+      </if>
+      <if test="basic.registerNum !=null and basic.registerNum!=''">
+        and e.register_num=#{basic.registerNum}
+      </if>
+      <if test="basic.name !=null and basic.name!=''">
+        and e.name like concat('%',#{basic.name},'%')
+      </if>
+      <if test="basic.enterpriseWordNo !=null and basic.enterpriseWordNo!=''">
+        and e.enterprise_word_no = #{basic.name}
+      </if>
+      <if test="basic.registerAddress !=null and basic.registerAddress!=''">
+        and e.register_address = #{basic.registerAddress}
+      </if>
+      <if test="basic.actContactAddress !=null and basic.actContactAddress!=''">
+        and e.act_contact_address = #{basic.actContactAddress}
+      </if>
+      <if test="basic.source !=null and basic.source!=''">
+        and e.source like concat('%',#{basic.source},'%')
+      </if>
+      <if test="basic.introducer !=null and basic.introducer!=''">
+        and e.introducer = #{basic.introducer}
+      </if>
+      <if test="basic.thisRegion !=null and basic.thisRegion!=''">
+        and e.this_region = #{basic.thisRegion}
+      </if>
+      <if test="basic.follower !=null and basic.follower !=''">
+        and e.follower like concat('%',#{basic.follower},'%')
+      </if>
+      <if test="business.process !=null">
+        and e.process = #{basic.process}
+      </if>
+      <if test="business.belongIndustry !=null and business.belongIndustry!=''">
+        and e.belong_industry = #{basic.belongIndustry}
+      </if>
+      <if test="business.business !=null and business.business!=''">
+        and e.business = #{basic.business}
+      </if>
+      <if test="business.motherCompany !=null and business.motherCompany!=''">
+        and e.mother_company = #{basic.motherCompany}
+      </if>
+      <if test="business.startDateStart !=null and business.startDateEnd!=null">
+        and str_to_date(e.start_date,'%Y-%m-%d') <![CDATA[>=]]> #{basic.startDateStart}
+        and str_to_date(e.start_date,'%Y-%m-%d')<![CDATA[<]]> #{basic.startDateEnd}
+      </if>
+      <if test="business.endDateStart !=null and business.endDateEnd!=null">
+        and str_to_date(e.end_date,'%Y-%m-%d') <![CDATA[>=]]> #{basic.endDateStart}
+        and str_to_date(e.end_date,'%Y-%m-%d')<![CDATA[<]]> #{basic.endDateEnd}
+      </if>
+
+      <if test="basic.financeName !=null and basic.financeName!=''">
+        and exists (select date from t_enterprise_person ep  where ep.enterprise_id=e.id and ep.name like concat('%',#{basic.financeName},'%') and ep.is_finance=1
+      </if>
+      <if test="basic.financePhone !=null and basic.financePhone!=''">
+        and exists (select date from t_enterprise_person ep  where ep.enterprise_id=e.id and ep.phone =#{basic.financePhone} and ep.is_finance=1
+      </if>
+      <if test="basic.masterName !=null and basic.masterName!=''">
+        and exists (select date from t_enterprise_person ep  where ep.enterprise_id=e.id and ep.name like concat('%',#{basic.masterName},'%') and ep.is_master=1
+      </if>
+      <if test="basic.masterPhone !=null and basic.masterPhone!=''">
+        and exists (select date from t_enterprise_person ep  where ep.enterprise_id=e.id and ep.phone =#{basic.masterPhone} and ep.is_master=1
+      </if>
+      <if test="basic.masterAddress !=null and basic.masterAddress!=''">
+        and exists (select date from t_enterprise_person ep  where ep.enterprise_id=e.id and ep.address =#{basic.masterAddress} and ep.is_master=1
+      </if>
+      <if test="basic.masterIdCard !=null and basic.masterIdCard!=''">
+        and exists (select date from t_enterprise_person ep  where ep.enterprise_id=e.id and ep.idcard =#{basic.masterIdCard} and ep.is_master=1
+      </if>
+      <if test="basic.settledDateStart !=null and basic.settledDateEnd!=null">
+        and  #{basic.settledDateStart} <![CDATA[>=]]> str_to_date((select es.create_time from t_enterprise_settled es where e.name=es.enterprise_name limit 1),'%Y-%m-%d')
+        and #{basic.settledDateEnd} <![CDATA[<]]> str_to_date((select es.create_time from t_enterprise_settled es where e.name=es.enterprise_name limit 1),'%Y-%m-%d')
+      </if>
+
+      <if test="tax.taxTotalStart !=null and tax.taxTotalEnd!=null">
+        and exists (select date from t_enterprise_tax et where e.name=et.enterprise_name and str_to_date(et.`date`,'%Y-%m') <![CDATA[>=]]> tax.taxTotalStart and str_to_date(et.`date`,'%Y-%m') <![CDATA[<]]> tax.taxTotalEnd
+      </if>
+
+      <if test="tax.thanTaxTotal !=null and tax.lessTaxTotal!=''">
+        and exists (select date from t_enterprise_tax et where e.name=et.enterprise_name and et.total_tax_total <![CDATA[>=]]> tax.thanTaxTotal and et.total_tax_total <![CDATA[<]]> tax.lessTaxTotal
+      </if>
+
+    </where>
+  </select>
+</mapper>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bemore.api.dao.mapper.AddEnterpriseDao">
+
+  <select id="getExportDetail" resultType="com.bemore.api.dto.AddEnterpriseDetailExportDto">
+    select @rowno:=@rowno+1 as no, r.* from
+    (select
+    e.enterprise_no,e.register_num,e.register_address,e.source,e.process,e.start_date,e.name,
+    tt.total_tax, tt.total_tax_total
+    from t_enterprise e
+    left join t_tax tt
+    on e.name = tt.enterprise_name
+    <where>
+      <if test="year!=null">
+        tt.year=#{year}
+      </if>
+      <if test="month!=null">
+        and tt.month=#{month}
+      </if>
+    </where>) r,(select @rowno:=0) t
+  </select>
+</mapper>
