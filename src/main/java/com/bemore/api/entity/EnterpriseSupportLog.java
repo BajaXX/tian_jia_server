@@ -16,6 +16,7 @@ public class EnterpriseSupportLog {
     private String depositBank;
     private int date;
     private String enterpriseName;
+    private String enterpriseNum;
     private String garden;
     private double monthAmount;
     private double supportAmount;
@@ -31,5 +32,8 @@ public class EnterpriseSupportLog {
     private String contractId;
     private String supportContractId;
     private String supportId;
+    private String enterpriseNo;
+    private String supportAreas;
+    private String supportProject;
 
 }

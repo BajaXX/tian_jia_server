@@ -1,10 +1,12 @@
 package com.bemore.api.controller;
 
 import com.bemore.api.dao.*;
+import com.bemore.api.dto.SupportMonthDto;
 import com.bemore.api.dto.req.SupportAgreementReq;
 import com.bemore.api.entity.*;
 import com.bemore.api.entity.request.SettledQueryParam;
 import com.bemore.api.entity.request.SupportAgreementParam;
+import com.bemore.api.entity.request.TaxExportRequest;
 import com.bemore.api.entity.response.PlatformSupportDataView;
 import com.bemore.api.entity.response.PlatformsContractView;
 import com.bemore.api.exception.WebException;
@@ -20,6 +22,7 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -52,6 +55,12 @@ public class SupportContractController {
 
     @Autowired
     private EnterpriseSupportLogDao enterpriseSupportLogDao;
+
+    @Autowired
+    private EnterpriseDao enterpriseDao;
+
+    @Autowired
+    private PlatformsSupportLogDao platformsSupportLogDao;
 
 
     @PostMapping("/modifySupportContract")
@@ -100,11 +109,20 @@ public class SupportContractController {
 
     @PostMapping("/getContractList")
     @ApiOperation(value = "获取所有协议")
-    public String getContractList() {
+    public String getContractList(@RequestBody(required = false) Contracts param) {
 
-        List<Contracts> contractsList = contractsDao.findAll();
+        List<Contracts> contractsList = new ArrayList<Contracts>();
 
+        if (Objects.isNull(param)) {
+            contractsList = contractsDao.findAll();
+        } else {
+            contractsList = contractsDao.findAllByContractNameLike("%" + param.getContractName() + "%");
+        }
         return GsonUtil.build(contractsList);
+//
+//        List<Contracts> contractsList = contractsDao.findAll();
+//
+//        return GsonUtil.build(contractsList);
     }
 
     @PostMapping("/getContractRules")
@@ -226,7 +244,7 @@ public class SupportContractController {
     @PostMapping("/getSupportContractEnterpriseList")
     @ApiOperation(value = "获取平台协议")
     public String getSupportContractEnterpriseList(@RequestBody(required = false) SupportContract param) {
-        List<String> supportContractList = new ArrayList<>();
+        List<String> supportContractList = new ArrayList<String>();
 
         if (Objects.isNull(param)) {
             supportContractList = supportContractDao.getSupportEnterpriseList();
@@ -244,7 +262,14 @@ public class SupportContractController {
         if (count > 0) {
             throw new WebException(104, "该企业有未结束的协议，请先作废原协议再新增协议");
         }
+
+        Enterprise enterprise = enterpriseDao.findByName(param.getEnterpriseName());
+        if (enterprise == null) {
+            throw new WebException(105, "未找到对应的企业");
+        }
+
         param.setStatus(1);
+        param.setEnterpriseNo(enterprise.getEnterpriseNo());
         supportContractDao.saveAndFlush(param);
         return GsonUtil.build("success");
     }
@@ -293,6 +318,13 @@ public class SupportContractController {
         return GsonUtil.build(list);
     }
 
+    @PostMapping(value = "/uploadSupportFiles")
+    public String uploadSupportFiles(@RequestParam MultipartFile file) {
+        System.out.println(file.getName());
+//        enterpriseTaxService.importEnterpriseTaxService(file,date);
+        return GsonUtil.build("success");
+    }
+
     @PostMapping("/getPlatformSupportList")
     @ApiOperation(value = "获取平台扶持列表")
     public String getPlatformSupportList(@RequestBody SupportAgreementReq supportAgreementReq) {
@@ -301,32 +333,42 @@ public class SupportContractController {
         int startDate = Integer.valueOf(supportAgreementReq.getStartDate());
         int endDate = Integer.valueOf(supportAgreementReq.getEndDate());
 
-        List<PlatformSupportDataView> list = new ArrayList<>();
-        List<String[]> objectsList = new ArrayList<>();
+        List<TPlatformsSupportLog> list = new ArrayList<>();
         if (Objects.nonNull(enterpriseName) && !"".equals(enterpriseName)) {
-            objectsList = enterpriseSupportLogDao.getPlatformSupportListByPlatformId(supportAgreementReq.getEnterpriseName(), startDate, endDate);
+            list = platformsSupportLogDao.findAllByPlatformIdAndDateBetweenOrderByDate(supportAgreementReq.getEnterpriseName(), startDate, endDate);
         } else {
-            objectsList = enterpriseSupportLogDao.getPlatformSupportList(startDate, endDate);
-        }
-
-        for (String[] t : objectsList) {
-            PlatformSupportDataView supportDataView = new PlatformSupportDataView();
-            supportDataView.setPlatformId(t[0]);
-            supportDataView.setPlatformName(t[1]);
-            supportDataView.setPlatformSupportAmount(Double.valueOf(t[2]));
-            supportDataView.setPlatformMonthAmount(Double.valueOf(t[3]));
-            supportDataView.setPlatformSurplus(Double.valueOf(t[4]));
-            supportDataView.setDate(Integer.valueOf(t[5]));
-            if (Objects.nonNull(t[0]) && !"".equals(t[0])) {
-                List<EnterpriseSupportLog> logs = enterpriseSupportLogDao.findByPlatformIdAndDate(supportDataView.getPlatformId(), supportDataView.getDate());
-                if (!logs.isEmpty()) {
-                    supportDataView.setEnterpriseSupportLogList(logs);
-                }
-            }
-
-            list.add(supportDataView);
+            list = platformsSupportLogDao.findAllByDateBetweenOrderByDate(startDate, endDate);
         }
 
         return GsonUtil.build(list);
+    }
+
+    @PostMapping("/getSupportMonth")
+    @ApiOperation(value = "获取扶持月度汇总")
+    public String getSupportMonth(@RequestBody TaxExportRequest body) {
+
+        int startDate = Integer.valueOf( body.getStartDate());
+
+        List<Object[]> list = enterpriseSupportLogDao.getSupportMonthByDate(startDate);
+        List<Object[]> platformlist = platformsSupportLogDao.getSupportMonthByDate(startDate);
+
+        List<SupportMonthDto> dtos = new ArrayList<>();
+
+        list.addAll(platformlist);
+
+        for (Object[] result : list) {
+            String supportAreas = (String) result[0];
+            String supportProject = (String) result[1];
+            double totalAmount = (double) result[2];
+
+            SupportMonthDto dto = new SupportMonthDto();
+            dto.setSupportAreas(supportAreas);
+            dto.setSupportProject(supportProject);
+            dto.setTotalAmount(totalAmount);
+
+            dtos.add(dto);
+        }
+
+        return GsonUtil.build(dtos);
     }
 }

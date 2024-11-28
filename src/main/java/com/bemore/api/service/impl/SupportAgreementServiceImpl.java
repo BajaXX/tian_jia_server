@@ -24,10 +24,7 @@ import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.bemore.api.constant.CommonConstants.SUPPORT_LEVEL;
@@ -58,6 +55,12 @@ public class SupportAgreementServiceImpl implements SupportAgreementService {
     @Autowired
     private EnterpriseSupportLogDao enterpriseSupportLogDao;
 
+    @Autowired
+    private EnterpriseDao enterpriseDao;
+
+    @Autowired
+    private PlatformsSupportLogDao platformsSupportLogDao;
+
 
     public SupportAgreementServiceImpl(SupportAgreementMapper supportAgreementMapper, EnterpriseTaxMapper enterpriseTaxMapper, SupportMonthLogMapper supportMonthLogMapper) {
         this.supportAgreementMapper = supportAgreementMapper;
@@ -71,8 +74,8 @@ public class SupportAgreementServiceImpl implements SupportAgreementService {
 
         String endDate = supportAgreementReq.getEndDate();
         int startYear = Integer.parseInt(endDate.substring(0, 4));
-        if (!Objects.isNull(enterpriseName) && !"".equals(enterpriseName) && Objects.nonNull(supportAgreementReq.getContractId())) {
-            enterpriseSupportLogDao.deleteEnterpriseSupportLogsByEnterpriseNameAndYearAndSupportId(enterpriseName, startYear, supportAgreementReq.getContractId());
+        if (!Objects.isNull(enterpriseName) && !"".equals(enterpriseName)) {
+            enterpriseSupportLogDao.deleteEnterpriseSupportLogsByEnterpriseNameAndYear(enterpriseName, startYear);
         } else {
             enterpriseSupportLogDao.deleteEnterpriseSupportLogsByYear(startYear);
         }
@@ -80,9 +83,98 @@ public class SupportAgreementServiceImpl implements SupportAgreementService {
 
     }
 
+//    @Override
+//    public void computePlatform(SupportAgreementReq supportAgreementReq) {
+//        String platformId = supportAgreementReq.getEnterpriseName();
+//
+//        String endDate = supportAgreementReq.getEndDate();
+//        int startYear = Integer.parseInt(endDate.substring(0, 4));
+//        int endMonth = Integer.parseInt(endDate.substring(4, 6));
+//        int sdate = startYear * 100 + 1;
+//        int edate = startYear * 100 + endMonth;
+//
+//
+//        if (!Objects.isNull(platformId) && !"".equals(platformId)) {
+//
+//            for (int curDate = sdate; curDate <= edate; curDate++) {
+//
+//                //获取本年度已经扶持金额
+//                List<EnterpriseSupportLog> yearEnterpriseSupportLogList = enterpriseSupportLogDao.findByPlatformIdAndYearAndDateLessThanEqual(platformId, startYear, curDate);
+//                double sumSupportYear = yearEnterpriseSupportLogList.stream().collect(Collectors.summarizingDouble(EnterpriseSupportLog::getSupportAmount)).getSum();
+//
+//                List<EnterpriseSupportLog> enterpriseSupportLogs = enterpriseSupportLogDao.findByPlatformIdAndDate(platformId, curDate);
+//                if (enterpriseSupportLogs.isEmpty()) throw new WebException(101, curDate + "月该平台下没有招商企业协议");
+//
+//                //本月平台扶持金总额
+//                double sumSupport = enterpriseSupportLogs.stream().collect(Collectors.summarizingDouble(EnterpriseSupportLog::getPlatformSupportAmount)).getSum();
+//
+//                //获取上月扶持数据
+//                List<EnterpriseSupportLog> lastEnterpriseSupportLogList = enterpriseSupportLogDao.findByPlatformIdAndDate(platformId, curDate - 1);
+//
+//
+//                //上月平台结余扶持金总额
+//                double sumLastSurplus = 0;
+//
+//                if (!lastEnterpriseSupportLogList.isEmpty()) {
+//                    sumLastSurplus = lastEnterpriseSupportLogList.stream().collect(Collectors.summarizingDouble(EnterpriseSupportLog::getPlatformSurplus)).getSum();
+//                }
+//
+//                // 当月结余
+//                double platformSurplus = 0;
+////                sumSupport += sumLastSurplus;
+//                double curMonthSumSupport = sumSupport + sumLastSurplus;
+//                double platform_month_amount = 0;
+//                if (sumSupportYear + sumSupport < 10000) {
+//                    if (curMonthSumSupport < 5000 && curMonthSumSupport >= 4000) {
+//                        platformSurplus = curMonthSumSupport - 4000;
+//                        platform_month_amount = 4000;
+//                    } else if (curMonthSumSupport < 4000) {
+//                        platformSurplus = curMonthSumSupport;
+//                    } else if (curMonthSumSupport >= 5000) {
+//                        platformSurplus = 10000 - curMonthSumSupport;
+//                        platform_month_amount = 10000;
+//                    }
+//                } else {
+//                    platformSurplus = curMonthSumSupport % 10000;
+//                    platform_month_amount = curMonthSumSupport - platformSurplus;
+//                    if (platformSurplus >= 5000) {
+//                        platform_month_amount += 10000;
+//                        platformSurplus = platformSurplus - 10000;
+//                    }
+//                }
+////                double platformSurplus = 0;
+////                if (sumSupport < 10000) platformSurplus = sumSupport;
+////                if (sumSupport > 10000) platformSurplus = sumSupport % 10000;
+////
+////
+////                // 当月扶持 每月清算，本月结余加上上月结余，如果结果大于等于5000 则扶持一万，当月结余为10000 - 结余金额
+////                double platform_month_amount = sumSupport - platformSurplus;
+////                platformSurplus = platformSurplus + sumLastSurplus;
+////                if (platformSurplus >= SUPPORT_LEVEL) {
+////                    platform_month_amount += 10000;
+////                    platformSurplus = platformSurplus - 10000;
+////                }
+//
+//
+//                for (EnterpriseSupportLog log : enterpriseSupportLogs) {
+//                    log.setPlatformMonthAmount(log.getPlatformSupportAmount() / sumSupport * platform_month_amount);
+//                    log.setPlatformSurplus(log.getPlatformSupportAmount() / sumSupport * platformSurplus);
+//
+//                    enterpriseSupportLogDao.save(log);
+//                }
+//            }
+//
+//        } else {
+//            throw new WebException(101, "必须选择招商平台");
+//        }
+//
+//    }
+
     @Override
     public void computePlatform(SupportAgreementReq supportAgreementReq) {
         String platformId = supportAgreementReq.getEnterpriseName();
+
+        Platforms platformInfo = platformsDao.getOne(platformId);
 
         String endDate = supportAgreementReq.getEndDate();
         int startYear = Integer.parseInt(endDate.substring(0, 4));
@@ -90,75 +182,196 @@ public class SupportAgreementServiceImpl implements SupportAgreementService {
         int sdate = startYear * 100 + 1;
         int edate = startYear * 100 + endMonth;
 
+//        if (!Objects.isNull(enterpriseName) && !"".equals(enterpriseName) && Objects.nonNull(supportAgreementReq.getContractId())) {
+//            enterpriseSupportLogDao.deleteEnterpriseSupportLogsByEnterpriseNameAndYearAndSupportId(enterpriseName, startYear, supportAgreementReq.getContractId());
+//        } else {
+//            enterpriseSupportLogDao.deleteEnterpriseSupportLogsByYear(startYear);
+//        }
+
+        platformsSupportLogDao.deleteByPlatformIdAndDateBetween(platformId, sdate, edate);
+
+        String sdate_str = new StringBuffer(String.valueOf(sdate)).insert(4, "-").toString();
+        String edate_str = new StringBuffer(String.valueOf(edate)).insert(4, "-").toString();
+
 
         if (!Objects.isNull(platformId) && !"".equals(platformId)) {
 
             for (int curDate = sdate; curDate <= edate; curDate++) {
+                List<String> enterpriseList = new ArrayList<String>();
+                String curdate_str = new StringBuffer(String.valueOf(curDate)).insert(4, "-").toString();
 
-                //获取本年度已经扶持金额
-                List<EnterpriseSupportLog> yearEnterpriseSupportLogList = enterpriseSupportLogDao.findByPlatformIdAndYearAndDateLessThanEqual(platformId, startYear, curDate);
-                double sumSupportYear = yearEnterpriseSupportLogList.stream().collect(Collectors.summarizingDouble(EnterpriseSupportLog::getSupportAmount)).getSum();
+                enterpriseList.addAll(supportContractDao.getEnterpriseByPlatformsId(platformId, curDate));
+                enterpriseList = enterpriseList.stream().distinct().collect(Collectors.toList());
+                //获取当前月下所有的企业名单
+                if (enterpriseList.isEmpty()) continue;
+                //获取截止到当前月该平台下所有的税收数据
+                List<EnterpriseTaxPlus> enterpriseTaxList = enterpriseTaxPlusDao.findByEnterpriseNameInAndDateBetween(enterpriseList, sdate_str, curdate_str);
+                if (enterpriseTaxList.isEmpty()) continue;
 
-                List<EnterpriseSupportLog> enterpriseSupportLogs = enterpriseSupportLogDao.findByPlatformIdAndDate(platformId, curDate);
-                if (enterpriseSupportLogs.isEmpty()) throw new WebException(101, curDate + "月该平台下没有招商企业协议");
+                //本年度平台已扶持总额
+                List<TPlatformsSupportLog> yearPlatformsSupportLog = platformsSupportLogDao.findAllByPlatformIdAndYearAndDateLessThan(platformId, startYear, curDate);
+                double sumMonthAmount_platform = yearPlatformsSupportLog.stream().collect(Collectors.summarizingDouble(TPlatformsSupportLog::getPlatformMonthAmount)).getSum();
+                //获取本年度企业已经扶持金额
+                List<EnterpriseSupportLog> yearEnterpriseSupportLogList = enterpriseSupportLogDao.findByPlatformIdAndYearAndDateLessThan(platformId, startYear, curDate);
 
-                //本月平台扶持金总额
-                double sumSupport = enterpriseSupportLogs.stream().collect(Collectors.summarizingDouble(EnterpriseSupportLog::getPlatformSupportAmount)).getSum();
-
-                //获取上月扶持数据
-                List<EnterpriseSupportLog> lastEnterpriseSupportLogList = enterpriseSupportLogDao.findByPlatformIdAndDate(platformId, curDate - 1);
-
-
-                //上月平台结余扶持金总额
-                double sumLastSurplus = 0;
-
-                if (!lastEnterpriseSupportLogList.isEmpty()) {
-                    sumLastSurplus = lastEnterpriseSupportLogList.stream().collect(Collectors.summarizingDouble(EnterpriseSupportLog::getPlatformSurplus)).getSum();
-                }
-
-                // 当月结余
-                double platformSurplus = 0;
-//                sumSupport += sumLastSurplus;
-                double curMonthSumSupport = sumSupport + sumLastSurplus;
-                double platform_month_amount = 0;
-                if (sumSupportYear + sumSupport < 10000) {
-                    if (curMonthSumSupport < 5000 && curMonthSumSupport >= 4000) {
-                        platformSurplus = curMonthSumSupport - 4000;
-                        platform_month_amount = 4000;
-                    } else if (curMonthSumSupport < 4000) {
-                        platformSurplus = curMonthSumSupport;
-                    } else if (curMonthSumSupport >= 5000) {
-                        platformSurplus = 10000 - curMonthSumSupport;
-                        platform_month_amount = 10000;
-                    }
-                } else {
-                    platformSurplus = curMonthSumSupport % 10000;
-                    platform_month_amount = curMonthSumSupport - platformSurplus;
-                    if (platformSurplus >= 5000) {
-                        platform_month_amount += 10000;
-                        platformSurplus = platformSurplus - 10000;
-                    }
-                }
-//                double platformSurplus = 0;
-//                if (sumSupport < 10000) platformSurplus = sumSupport;
-//                if (sumSupport > 10000) platformSurplus = sumSupport % 10000;
+                List<EnterpriseSupportLog> curSupportLog=enterpriseSupportLogDao.findByPlatformIdAndYearAndDate(platformId, startYear, curDate);
+//                double sumMonthAmount = yearEnterpriseSupportLogList.stream().collect(Collectors.summarizingDouble(EnterpriseSupportLog::getSupportAmount)).getSum();
+                //本年度企业已经扶持的
+//                double sumMonthAmount = yearEnterpriseSupportLogList.stream().collect(Collectors.summarizingDouble(EnterpriseSupportLog::getSupportAmount)).getSum();
+                double sumMonthAmount = 0.0;
+                // 第一步：找到最大的 date
+//                Optional<Integer> maxDateOptional = yearEnterpriseSupportLogList.stream()
+//                        .map(EnterpriseSupportLog::getDate)
+//                        .max(Integer::compareTo);
 //
+//                // 如果没有找到任何日期，返回 0.0
+//                if (maxDateOptional.isPresent()) {
+//                    int maxDate = maxDateOptional.get();
 //
-//                // 当月扶持 每月清算，本月结余加上上月结余，如果结果大于等于5000 则扶持一万，当月结余为10000 - 结余金额
-//                double platform_month_amount = sumSupport - platformSurplus;
-//                platformSurplus = platformSurplus + sumLastSurplus;
-//                if (platformSurplus >= SUPPORT_LEVEL) {
-//                    platform_month_amount += 10000;
-//                    platformSurplus = platformSurplus - 10000;
+//                    // 第二步：过滤出该 date 对应的所有记录，并计算 SupportAmount 总和
+//                    sumMonthAmount = yearEnterpriseSupportLogList.stream()
+//                            .filter(log -> log.getDate() == maxDate)
+//                            .mapToDouble(EnterpriseSupportLog::getSupportAmount)
+//                            .sum();
+//                }
+
+                double sumSurplus=curSupportLog.stream().collect(Collectors.summarizingDouble(EnterpriseSupportLog::getSurplus)).getSum();
+//                double month=curSupportLog.stream().collect(Collectors.summarizingDouble(EnterpriseSupportLog::getMonthAmount)).getSum();
+//                double sum=curSupportLog.stream().collect(Collectors.summarizingDouble(EnterpriseSupportLog::getSupportAmount)).getSum();
+
+                sumMonthAmount=curSupportLog.stream().collect(Collectors.summarizingDouble(EnterpriseSupportLog::getSupportAmount)).getSum();
+
+//                sumMonthAmount = yearEnterpriseSupportLogList.stream().collect(Collectors.summarizingDouble(EnterpriseSupportLog::getMonthAmount)).getSum();
+//                log.info("整数：" + sumMonthAmount);
+//                log.info("差额：" + (sum-month));
+//                log.info("month：" + month);
+//                log.info("getSupportAmount：" + sum);
+
+
+//                sumMonthAmount+=(month-sumSurplus)-3959.4852535;
+
+
+                // 增值税
+                Double addedTax = enterpriseTaxList.stream().collect(Collectors.summarizingDouble(EnterpriseTaxPlus::getAddedTax)).getSum();
+
+
+                // 企业所得税
+                Double incomeTax = enterpriseTaxList.stream().collect(Collectors.summarizingDouble(EnterpriseTaxPlus::getIncomeTax)).getSum();
+                // 个人所得税
+                Double personTax = enterpriseTaxList.stream().collect(Collectors.summarizingDouble(EnterpriseTaxPlus::getPersonTax)).getSum();
+
+
+                double allTax = addedTax + incomeTax + personTax;
+
+
+//                double rate=0.0;
+//                if(platformInfo.getPlatformName().equals("裕桐")){
+//                    rate=90.0;
+//                }else if(platformInfo.getPlatformName().equals("明时")){
+//                    rate=90.0;
+//                }else if(platformInfo.getPlatformName().equals("道穗")){
+//                    rate=95.0;
 //                }
 
 
-                for (EnterpriseSupportLog log : enterpriseSupportLogs) {
-                    log.setPlatformMonthAmount(log.getPlatformSupportAmount() / sumSupport * platform_month_amount);
-                    log.setPlatformSurplus(log.getPlatformSupportAmount() / sumSupport * platformSurplus);
+                TPlatformsSupportLog supportLog = new TPlatformsSupportLog();
 
-                    enterpriseSupportLogDao.save(log);
+                //获取平台扶持政策
+                List<PlatformsContract> platformsContractList = platformsContractDao.findPlatformsContractsByPlatformIdAndCstatusAndIsFundAndAgreementStartLessThanEqualAndAgreementEndGreaterThanEqual(platformId, 1, 0, curDate, curDate);
+                if (platformsContractList.isEmpty())
+                    throw new WebException(101, platformInfo.getPlatformName() + "，没有对应的平台协议");
+                if (platformsContractList.size() > 1)
+                    throw new WebException(101, platformInfo.getPlatformName() + "，有多个有效的平台协议，数据错误，请联系管理员");
+                PlatformsContract platformsContract = platformsContractList.get(0);
+
+                supportLog.setPlatformContractId(platformsContract.getId());
+
+                //获取平台政策对应的规则
+                List<ContractRules> rules = contractRulesDao.findAllByContractIdOrderByTaxStart(platformsContract.getContractId());
+                if (rules.isEmpty()) throw new WebException(101, platformsContract.getContractName() + "扶持条款找不到");
+
+                Double finalAllTax = allTax;
+                ContractRules platform_rule = rules.stream().filter(t -> t.getTaxStart() * 10000 <= finalAllTax && t.getTaxEnd() * 10000 > finalAllTax).findFirst().orElse(null);
+                supportLog.setContractId(platform_rule.getContractId());
+                if (Objects.isNull(platform_rule))
+                    throw new WebException(103, platformInfo.getPlatformName() + ",平台政策未找到,月份:" + curdate_str);
+
+
+                Double addedTaxRateValue_base = platform_rule.getAddedTaxRate() / 100 * platform_rule.getGroupRate() / 100 * 0.325;
+                Double incomeTaxRateValue_base = platform_rule.getIncomeTaxRate() / 100 * platform_rule.getGroupRate() * 0.2 / 100;
+                Double personTaxRateValue_base = platform_rule.getPersonTaxRate() / 100 * platform_rule.getGroupRate() * 0.22 / 100;
+
+
+                //截止当月，全年累计税收基数
+                double supportAmount_platform = addedTax * addedTaxRateValue_base + incomeTax * incomeTaxRateValue_base + personTax * personTaxRateValue_base;
+
+                //扣除已经扶持给企业的，计算当月应扶持的金额
+                double curMonthSupport_platform = supportAmount_platform - sumMonthAmount;
+
+
+                supportLog.setDate(curDate);
+                supportLog.setBankAccount(platformsContract.getBankAccount());
+                supportLog.setDepositBank(platformsContract.getDepositBank());
+                supportLog.setGarden("天佳经济区");
+                supportLog.setPlatformId(platformId);
+                supportLog.setPlatformName(platformInfo.getPlatformName());
+                supportLog.setYear(startYear);
+                supportLog.setStatus(1);
+                supportLog.setSupportAreas(platformsContract.getSupportAreas());
+                supportLog.setSupportProject(platformsContract.getSupportProject());
+
+                double platform_surplus = 0;
+                double platform_monthAmount = 0;
+                if (curMonthSupport_platform < 10000) {
+                    if (curMonthSupport_platform < 5000 && curMonthSupport_platform >= 4000) {
+                        platform_surplus = curMonthSupport_platform - 4000;
+                        platform_monthAmount = 4000;
+                    } else if (curMonthSupport_platform < 4000) {
+                        platform_surplus = curMonthSupport_platform;
+                    } else if (curMonthSupport_platform >= 5000) {
+                        platform_surplus = 10000 - curMonthSupport_platform;
+                        platform_monthAmount = 10000;
+                    }
+
+                } else {
+                    platform_surplus = curMonthSupport_platform % 10000;
+                    platform_monthAmount = curMonthSupport_platform - platform_surplus;
+                    if (platform_surplus >= 5000) {
+                        platform_monthAmount += 10000;
+                        platform_surplus = platform_surplus - 10000;
+                    }
                 }
+
+                supportLog.setPlatformSupportAmount(supportAmount_platform);
+                supportLog.setPlatformSurplus(platform_surplus);
+                supportLog.setPlatformMonthAmount(platform_monthAmount - sumMonthAmount_platform);
+
+
+                log.info("================================================");
+                log.info("计算月份：" + curdate_str);
+                log.info("企业名单：" + String.join(",", enterpriseList));
+                log.info("参与计算的企业个数：" + enterpriseList.size());
+
+                log.info("截止本月不含本月平台已扶持总额：" + sumMonthAmount_platform);
+                log.info("截止本月不含本月平台下企业已扶持总额：" + sumMonthAmount);
+                log.info("截止本月增值税总额：" + String.format("%.4f", addedTax));
+                log.info("截止本月企业所得税总额：" + String.format("%.4f", incomeTax));
+                log.info("截止本月个人所得税总额：" + String.format("%.4f", personTax));
+                log.info("截止本月所有税收总额：" + String.format("%.4f", allTax));
+                log.info("适用的规则：增值税率：" + platform_rule.getAddedTaxRate() + ",计算结果：" + addedTaxRateValue_base);
+                log.info("企业所得税率：" + platform_rule.getIncomeTaxRate() + ",计算结果：" + incomeTaxRateValue_base);
+                log.info("个人所得税率：" + platform_rule.getPersonTaxRate() + ",计算结果：" + personTaxRateValue_base);
+                log.info("集团税率：" + platform_rule.getGroupRate());
+                log.info("计算扶持金累计税收基数：" + supportAmount_platform);
+                log.info("扣除已扶持给企业后的基数：" + (supportAmount_platform - sumMonthAmount));
+                log.info("当月应扶持：" + supportLog.getPlatformSupportAmount());
+                log.info("当月实际扶持：" + supportLog.getPlatformMonthAmount());
+                log.info("当月结余：" + supportLog.getPlatformSurplus());
+                log.info("当月所有企业累计扶持差额：" + sumSurplus);
+
+
+                platformsSupportLogDao.save(supportLog);
+
             }
 
         } else {
@@ -198,12 +411,19 @@ public class SupportAgreementServiceImpl implements SupportAgreementService {
             List<EnterpriseTaxPlus> enterpriseTaxList = enterpriseTaxPlusDao.findByEnterpriseNameAndDateBetween(enterprise, sdate_str, edate_str);
             if (enterpriseTaxList.isEmpty()) continue;
 
+            Enterprise enterpriseInfo = enterpriseDao.findByName(enterprise);
+            if (enterpriseInfo == null) throw new WebException(101, enterprise + "企业信息不存在。");
+
 
             for (int curDate = sdate; curDate <= edate; curDate++) {
                 //获取本年度已经扶持金额
                 List<EnterpriseSupportLog> yearEnterpriseSupportLogList = enterpriseSupportLogDao.findByEnterpriseNameAndYearAndDateLessThanEqual(enterprise, startYear, curDate);
-                double sumSupportYear = yearEnterpriseSupportLogList.stream().collect(Collectors.summarizingDouble(EnterpriseSupportLog::getSupportAmount)).getSum();
+//                //本年度累计应付持金额
+//                double sumSupportYear = yearEnterpriseSupportLogList.stream().collect(Collectors.summarizingDouble(EnterpriseSupportLog::getSupportAmount)).getSum();
+                //本年度企业已经扶持的
                 double sumMonthAmount = yearEnterpriseSupportLogList.stream().collect(Collectors.summarizingDouble(EnterpriseSupportLog::getMonthAmount)).getSum();
+                //本年度平台已扶持总额
+                double sumMonthAmount_platform = yearEnterpriseSupportLogList.stream().collect(Collectors.summarizingDouble(EnterpriseSupportLog::getPlatformMonthAmount)).getSum();
 
                 //当前处理月份
                 String curDateStr = new StringBuffer(String.valueOf(curDate)).insert(4, "-").toString();
@@ -211,8 +431,8 @@ public class SupportAgreementServiceImpl implements SupportAgreementService {
 
 
                 //获取本月的税务数据
-                EnterpriseTaxPlus enterpriseTaxPlus = enterpriseTaxList.stream().filter(t -> t.getDate().equals(curDateStr)).findFirst().orElse(null);
-                if (Objects.isNull(enterpriseTaxPlus)) continue;
+//                EnterpriseTaxPlus enterpriseTaxPlus = enterpriseTaxList.stream().filter(t -> t.getDate().equals(curDateStr)).findFirst().orElse(null);
+//                if (Objects.isNull(enterpriseTaxPlus)) continue;
 
                 int finalCurDate = curDate;
                 List<EnterpriseTaxPlus> allTaxCurDate = enterpriseTaxList.stream()
@@ -222,12 +442,12 @@ public class SupportAgreementServiceImpl implements SupportAgreementService {
                 //获取三方协议
                 SupportContract supportContract = null;
 
-                if (Objects.nonNull(supportAgreementReq.getContractId()) && !"".equals(supportAgreementReq.getContractId())) {
-                    //获取扶持协议对象
-                    supportContract = supportContractDao.getOne(supportAgreementReq.getContractId());
-                    if (Objects.isNull(supportContract)) throw new WebException(102, enterprise + "指定的协议未找到，无法计算");
-
-                } else {
+//                if (Objects.nonNull(supportAgreementReq.getContractId()) && !"".equals(supportAgreementReq.getContractId())) {
+//                    //获取扶持协议对象
+//                    supportContract = supportContractDao.getOne(supportAgreementReq.getContractId());
+//                    if (Objects.isNull(supportContract)) throw new WebException(102, enterprise + "指定的协议未找到，无法计算");
+//
+//                } else {
 
                     //1 获取当前企业有效的扶持协议
                     List<SupportContract> supportContractList = supportContractDao.findByEnterpriseNameAndDate(enterprise, curDate);
@@ -238,7 +458,7 @@ public class SupportAgreementServiceImpl implements SupportAgreementService {
                     if (supportContractList.size() > 1)
                         throw new WebException(101, enterprise + "存在两份有效协议，无法计算，请检查数据。");
                     supportContract = supportContractList.get(0);
-                }
+//                }
 
 
                 //已有当月扶持数据，跳过继续
@@ -254,27 +474,8 @@ public class SupportAgreementServiceImpl implements SupportAgreementService {
                 EnterpriseSupportLog lastEnterpriseSupportLog = lastEnterpriseSupportLogList.isEmpty() || Objects.isNull(lastEnterpriseSupportLogList.get(0)) ? null : lastEnterpriseSupportLogList.get(0);
 
                 //2 计算
-                //获取企业类型
-                int isFund = supportContract.getIsFund();
-                //获取园区扶持政策
-                List<ContractRules> contractRules = contractRulesDao.findAllByContractIdOrderByTaxStart(supportContract.getContractId());
-                if (contractRules.isEmpty()) throw new WebException(101, supportContract.getContractName() + "扶持条款找不到");
 
-                double ttt = enterpriseTaxPlus.getTotalTaxTotal() < 0 ? 0 : enterpriseTaxPlus.getTotalTaxTotal();
-
-
-                //获取园区政策
-                ContractRules contractRule = contractRules.stream().filter(t -> t.getTaxStart() * 10000 <= ttt && t.getTaxEnd() * 10000 > ttt).findFirst().orElse(null);
-                if (Objects.isNull(contractRule)) throw new WebException(103, enterprise + "园区政策未找到");
-
-
-                Double addedTaxRateValue_base = contractRule.getAddedTaxRate() / 100 * contractRule.getGroupRate() / 100 * 0.325;
-                Double incomeTaxRateValue_base = contractRule.getIncomeTaxRate() * contractRule.getGroupRate() * 0.2 / 10000;
-                Double personTaxRateValue_base = contractRule.getPersonTaxRate() * contractRule.getGroupRate() * 0.22 / 10000;
-
-                EnterpriseSupportLog supportLog = new EnterpriseSupportLog();
-
-                if (enterprise.equals("上海积怡尼经贸有限公司")) {
+                if (enterprise.equals("上海青浦密封材料厂")) {
                     System.out.println(enterprise);
                 }
 
@@ -295,6 +496,29 @@ public class SupportAgreementServiceImpl implements SupportAgreementService {
 //                    incomeTax = Util.formatDouble(incomeTax / 10000, 2);
 //                    personTax = Util.formatDouble(personTax / 10000, 2);
 //                }
+                //企业截止本月全部税收总额
+                double total_tax = addedTax + incomeTax + personTax;
+
+
+                //获取企业类型
+                int isFund = supportContract.getIsFund();
+                //获取园区扶持政策
+                List<ContractRules> contractRules = contractRulesDao.findAllByContractIdOrderByTaxStart(supportContract.getContractId());
+                if (contractRules.isEmpty()) throw new WebException(101, supportContract.getContractName() + "扶持条款找不到");
+
+                double ttt = total_tax <= 0 ? 0 : total_tax;
+
+
+                //获取园区政策
+                ContractRules contractRule = contractRules.stream().filter(t -> t.getTaxStart() * 10000 <= ttt && t.getTaxEnd() * 10000 > ttt).findFirst().orElse(null);
+                if (Objects.isNull(contractRule)) throw new WebException(103, enterprise + "园区政策未找到");
+
+
+                Double addedTaxRateValue_base = contractRule.getAddedTaxRate() / 100 * contractRule.getGroupRate() / 100 * 0.325;
+                Double incomeTaxRateValue_base = contractRule.getIncomeTaxRate() * contractRule.getGroupRate() * 0.2 / 10000;
+                Double personTaxRateValue_base = contractRule.getPersonTaxRate() * contractRule.getGroupRate() * 0.22 / 10000;
+
+                EnterpriseSupportLog supportLog = new EnterpriseSupportLog();
 
                 //截止当月，全年累计税收基数
                 double supportAmount_base = addedTax * addedTaxRateValue_base + incomeTax * incomeTaxRateValue_base + personTax * personTaxRateValue_base;
@@ -305,6 +529,8 @@ public class SupportAgreementServiceImpl implements SupportAgreementService {
 
 //                supportAmount_base = supportAmount_base - sumMonthAmount;
                 log.info("本月扶持金额...{}", supportAmount_base);
+
+
                 // 查询上月结余
 
                 // 上月结余
@@ -320,9 +546,9 @@ public class SupportAgreementServiceImpl implements SupportAgreementService {
                 //当月参与扶持的税收
                 double curMonthSupport = supportAmount_base;
 
-                if (enterpriseTaxPlus.getYear() <= 2023) {
-                    curMonthSupport = Util.formatDouble(curMonthSupport /10000,2)*10000;
-                }
+//                if (curDate > 202302) {
+//                    curMonthSupport = Util.formatDouble(curMonthSupport / 10000, 2) * 10000;
+//                }
                 // 当月结余
                 double surplus = 0;
                 //当月累计扶持金额
@@ -360,7 +586,7 @@ public class SupportAgreementServiceImpl implements SupportAgreementService {
                 } else {
                     //新的计算规则
 
-                    if (supportAmount_base < 10000) {
+                    if (curMonthSupport < 10000) {
                         if (curMonthSupport < 5000 && curMonthSupport >= 4000) {
                             surplus = curMonthSupport - 4000;
                             monthAmount = 4000;
@@ -388,12 +614,13 @@ public class SupportAgreementServiceImpl implements SupportAgreementService {
 //                }
 
 
-                supportLog.setGarden("天佳经济园");
+                supportLog.setGarden("天佳经济区");
                 supportLog.setSupportId(supportContract.getId());
                 supportLog.setBankAccount(supportContract.getBankAccount());
                 supportLog.setDepositBank(supportContract.getDepositBank());
                 supportLog.setDate(curDate);
                 supportLog.setEnterpriseName(supportContract.getEnterpriseName());
+                supportLog.setEnterpriseNum(enterpriseInfo.getRegisterNum());
                 supportLog.setMonthAmount(monthAmount);
                 supportLog.setSupportAmount(supportAmount_base);
                 supportLog.setSurplus(surplus);
@@ -402,17 +629,17 @@ public class SupportAgreementServiceImpl implements SupportAgreementService {
                 supportLog.setPlatformId(supportContract.getPlatformId());
                 supportLog.setPlatformName(supportContract.getPlatformName());
                 supportLog.setSupportContractId(supportContract.getContractId());
+                supportLog.setEnterpriseNo(supportContract.getEnterpriseNo());
+                supportLog.setSupportAreas(supportContract.getSupportAreas());
+                supportLog.setSupportProject(supportContract.getSupportProject());
 
 
-                //计算平台扶持金
+                ///////////////////////计算平台扶持金/////////////////////////
                 if (Objects.nonNull(supportContract.getPlatformId()) && !"".equals(supportContract.getPlatformId())) {
                     //处理平台的扶持金额
 
-                    //获取平台有效政策
-
-
                     //获取平台扶持政策
-                    List<PlatformsContract> platformsContractList = platformsContractDao.findPlatformsContractsByPlatformIdAndIsFundAndAgreementStartLessThanEqualAndAgreementEndGreaterThanEqual(supportContract.getPlatformId(), isFund, curDate, curDate);
+                    List<PlatformsContract> platformsContractList = platformsContractDao.findPlatformsContractsByPlatformIdAndCstatusAndIsFundAndAgreementStartLessThanEqualAndAgreementEndGreaterThanEqual(supportContract.getPlatformId(), 1, isFund, curDate, curDate);
                     if (platformsContractList.isEmpty()) throw new WebException(101, enterprise + "，没有对应的平台协议");
                     if (platformsContractList.size() > 1)
                         throw new WebException(101, enterprise + "，有多个有效的平台协议，数据错误，请联系管理员");
@@ -421,84 +648,236 @@ public class SupportAgreementServiceImpl implements SupportAgreementService {
 
                     supportLog.setPlatformContractId(platformsContract.getId());
 
+                    //获取平台政策对应的规则
                     List<ContractRules> rules = contractRulesDao.findAllByContractIdOrderByTaxStart(platformsContract.getContractId());
                     if (rules.isEmpty()) throw new WebException(101, platformsContract.getContractName() + "扶持条款找不到");
 
                     //获取本月平台所有企业税收
                     Double allTax = enterpriseTaxPlusDao.sumTaxByPlatformIdAndDate(supportContract.getPlatformId(), curDateStr, supportContract.getIsFund());
-                    Double lastSumTax = enterpriseTaxPlusDao.sumTaxByPlatformIdAndDate(supportContract.getPlatformId(), lastDateStr, supportContract.getIsFund());
+//                    Double lastSumTax = enterpriseTaxPlusDao.sumTaxByPlatformIdAndDate(supportContract.getPlatformId(), lastDateStr, supportContract.getIsFund());
                     allTax = Objects.isNull(allTax) ? 0 : allTax;
-                    lastSumTax = Objects.isNull(lastSumTax) ? 0 : lastSumTax;
+//                    lastSumTax = Objects.isNull(lastSumTax) ? 0 : lastSumTax;
 
-                    //获取上月匹配平台政策
-                    Double finalLastSumTax = lastSumTax;
-                    ContractRules rule_last = rules.stream().filter(t -> t.getTaxStart() * 10000 <= finalLastSumTax && t.getTaxEnd() * 10000 > finalLastSumTax).findFirst().orElse(null);
-                    if (Objects.isNull(rule_last))
-                        throw new WebException(103, enterprise + ",平台政策未找到,月份:" + lastDateStr);
+//                    //获取上月匹配平台政策
+//                    Double finalLastSumTax = lastSumTax;
+//                    ContractRules rule_last = rules.stream().filter(t -> t.getTaxStart() * 10000 <= finalLastSumTax && t.getTaxEnd() * 10000 > finalLastSumTax).findFirst().orElse(null);
+//                    if (Objects.isNull(rule_last))
+//                        throw new WebException(103, enterprise + ",平台政策未找到,月份:" + lastDateStr);
 
 
                     //获取本月匹配平台政策
                     Double finalAllTax = allTax;
-                    ContractRules rule = rules.stream().filter(t -> t.getTaxStart() * 10000 <= finalAllTax && t.getTaxEnd() * 10000 > finalAllTax).findFirst().orElse(null);
-                    if (Objects.isNull(rule)) throw new WebException(103, enterprise + ",平台政策未找到,月份:" + curDateStr);
+                    ContractRules platform_rule = rules.stream().filter(t -> t.getTaxStart() * 10000 <= finalAllTax && t.getTaxEnd() * 10000 > finalAllTax).findFirst().orElse(null);
+                    if (Objects.isNull(platform_rule))
+                        throw new WebException(103, enterprise + ",平台政策未找到,月份:" + curDateStr);
 
                     supportLog.setContractId(platformsContract.getContractId());
 
-                    if (rule_last.getId().equals(rule.getId())) {
+                    //道穗的计算方式
+                    if ("道穗".equals(supportContract.getPlatformName())) {
+                        Double addedTaxRateValue_platform = platform_rule.getAddedTaxRate() * platform_rule.getGroupRate() * 0.325 / 10000;
+                        Double incomeTaxRateValue_platform = platform_rule.getIncomeTaxRate() * platform_rule.getGroupRate() * 0.2 / 10000;
+                        Double personTaxRateValue_platform = platform_rule.getPersonTaxRate() * platform_rule.getGroupRate() * 0.22 / 10000;
+                        double supportAmount_platform = addedTax * addedTaxRateValue_platform + incomeTax * incomeTaxRateValue_platform + personTax * personTaxRateValue_platform - supportAmount_base;
+                        double curMonthSupport_platform = supportAmount_platform;
 
+                        if (startYear <= 2023) {
+                            curMonthSupport_platform = Util.formatDouble(curMonthSupport_platform / 10000, 2) * 10000;
+                        }
+                        //1-5月计算方式
+                        if (curDate <= 202305) {
+                            if (curMonthSupport_platform >= 20000 && enterprise.endsWith("有限公司")) {
+                                if (curMonthSupport_platform >= 10000) {
+                                    double platform_surplus = curMonthSupport_platform % 10000;
+                                    double platform_monthAmount = curMonthSupport_platform - platform_surplus;
+                                    supportLog.setPlatformSupportAmount(supportAmount_platform);
+                                    supportLog.setPlatformSurplus(platform_surplus);
+                                    supportLog.setPlatformMonthAmount(platform_monthAmount - sumMonthAmount_platform);
 
-                        Double addedTaxRateValue_platform = rule.getAddedTaxRate() * rule.getGroupRate() * 0.325 / 10000;
-                        Double incomeTaxRateValue_platform = rule.getIncomeTaxRate() * rule.getGroupRate() * 0.2 / 10000;
-                        Double personTaxRateValue_platform = rule.getPersonTaxRate() * rule.getGroupRate() * 0.22 / 10000;
+                                } else {
+                                    supportLog.setPlatformSupportAmount(supportAmount_platform);
+                                    supportLog.setPlatformSurplus(curMonthSupport_platform);
+                                }
+                            } else {
+                                supportLog.setPlatformSupportAmount(supportAmount_platform);
+                                supportLog.setPlatformSurplus(curMonthSupport_platform);
+                            }
+                        } else {
+                            //六月份以后
+                            if (curMonthSupport_platform >= 10000) {
+                                double platform_surplus = curMonthSupport_platform % 10000;
+                                double platform_monthAmount = curMonthSupport_platform - platform_surplus;
+                                supportLog.setPlatformSupportAmount(supportAmount_platform);
+                                supportLog.setPlatformSurplus(platform_surplus);
+                                supportLog.setPlatformMonthAmount(platform_monthAmount - sumMonthAmount_platform);
+                            } else {
+                                supportLog.setPlatformSupportAmount(supportAmount_platform);
+                                supportLog.setPlatformSurplus(curMonthSupport_platform);
+                            }
+                        }
 
+                    } else if ("裕桐".equals(supportContract.getPlatformName())) {
+                        //默认是2018年之后
+                        double rate = 84;
+                        //2018年之前的扶持率是90%
+                        if (enterpriseInfo.getSettledDate() != null && Integer.valueOf(enterpriseInfo.getSettledDate().substring(0, 4)) <= 2018) {
+                            rate = 90;
+                        }
+                        if (curDate > 202305) {
+                            rate = 90;
+                        }
 
-                        log.info("企业名称：{}", enterprise);
-                        log.info("月份：{}", curDateStr);
-                        log.info("匹配增值税比率：{}", rule.getAddedTaxRate());
-                        log.info("匹配所得税比率：{}", rule.getIncomeTaxRate());
-                        log.info("匹配个人所得税比率：{}", rule.getPersonTaxRate());
-                        log.info("集团率：{}", rule.getGroupRate());
-                        log.info("增值税计算值：{}", addedTaxRateValue_platform);
-                        log.info("所得税计算值：{}", incomeTaxRateValue_platform);
-                        log.info("个人所得税计算值：{}", personTaxRateValue_platform);
+                        Double addedTaxRateValue_platform = rate * rate * 0.325 / 10000;
+                        Double incomeTaxRateValue_platform = rate * rate * 0.2 / 10000;
+                        Double personTaxRateValue_platform = rate * rate * 0.22 / 10000;
+                        double supportAmount_platform = addedTax * addedTaxRateValue_platform + incomeTax * incomeTaxRateValue_platform + personTax * personTaxRateValue_platform - supportAmount_base;
+                        double curMonthSupport_platform = supportAmount_platform;
 
+                        if (startYear <= 2023) {
+                            curMonthSupport_platform = Util.formatDouble(curMonthSupport_platform / 10000, 2) * 10000;
+                        }
+                        //1-5月计算方式
+                        if (curDate <= 202305) {
+                            if (curMonthSupport_platform >= 20000) {
+                                if (curMonthSupport_platform >= 10000) {
+                                    double platform_surplus = curMonthSupport_platform % 10000;
+                                    double platform_monthAmount = curMonthSupport_platform - platform_surplus;
+                                    supportLog.setPlatformSupportAmount(supportAmount_platform);
+                                    supportLog.setPlatformSurplus(platform_surplus);
+                                    supportLog.setPlatformMonthAmount(platform_monthAmount - sumMonthAmount_platform);
 
-                        double supportAmount_platform = enterpriseTaxPlus.getAddedTax() * addedTaxRateValue_platform + enterpriseTaxPlus.getIncomeTax() * incomeTaxRateValue_platform + enterpriseTaxPlus.getPersonTax() * personTaxRateValue_platform - supportAmount_base;
+                                } else {
+                                    supportLog.setPlatformSupportAmount(supportAmount_platform);
+                                    supportLog.setPlatformSurplus(supportAmount_platform);
+                                }
+                            } else {
+                                supportLog.setPlatformSupportAmount(supportAmount_platform);
+                                supportLog.setPlatformSurplus(supportAmount_platform);
+                            }
+                        } else {
+                            //六月份以后
+                            if (curMonthSupport_platform >= 10000) {
+                                double platform_surplus = curMonthSupport_platform % 10000;
+                                double platform_monthAmount = curMonthSupport_platform - platform_surplus;
+                                supportLog.setPlatformSupportAmount(supportAmount_platform);
+                                supportLog.setPlatformSurplus(platform_surplus);
+                                supportLog.setPlatformMonthAmount(platform_monthAmount - sumMonthAmount_platform);
+                            } else {
+                                supportLog.setPlatformSupportAmount(supportAmount_platform);
+                                supportLog.setPlatformSurplus(supportAmount_platform);
+                            }
+                        }
 
+                    } else if ("明时".equals(supportContract.getPlatformName())) {
 
-                        log.info("企业增值税...{}", enterpriseTaxPlus.getAddedTax());
-                        log.info("所得税...{}", enterpriseTaxPlus.getIncomeTax());
-                        log.info("个人所得税...{}", enterpriseTaxPlus.getPersonTax());
-                        log.info("平台当月应获得金额...{}", supportAmount_platform);
+                        //默认是2018年之后
+                        double rate = 85;
+                        //2018年之前的扶持率是90%
+                        if (enterpriseInfo.getSettledDate() != null) {
+                            if (Integer.valueOf(enterpriseInfo.getSettledDate().substring(0, 4)) <= 2018) rate = 90;
+                        }
+                        if (curDate > 202305) {
+                            rate = 90;
+                        }
 
+                        Double addedTaxRateValue_platform = rate * rate * 0.325 / 10000;
+                        Double incomeTaxRateValue_platform = rate * rate * 0.2 / 10000;
+                        Double personTaxRateValue_platform = rate * rate * 0.22 / 10000;
+                        double supportAmount_platform = addedTax * addedTaxRateValue_platform + incomeTax * incomeTaxRateValue_platform + personTax * personTaxRateValue_platform - supportAmount_base;
+                        double curMonthSupport_platform = supportAmount_platform;
 
-                        supportLog.setPlatformSupportAmount(supportAmount_platform);
+                        if (startYear <= 2023) {
+                            curMonthSupport_platform = Util.formatDouble(curMonthSupport_platform / 10000, 2) * 10000;
+                        }
+                        //1-5月计算方式
+                        if (curDate <= 202305) {
+                            if (curMonthSupport_platform >= 20000) {
+                                if (curMonthSupport_platform >= 10000) {
+                                    double platform_surplus = curMonthSupport_platform % 10000;
+                                    double platform_monthAmount = curMonthSupport_platform - platform_surplus;
+                                    supportLog.setPlatformSupportAmount(supportAmount_platform);
+                                    supportLog.setPlatformSurplus(platform_surplus);
+                                    supportLog.setPlatformMonthAmount(platform_monthAmount - sumMonthAmount_platform);
 
-                    } else {
+                                } else {
+                                    supportLog.setPlatformSupportAmount(supportAmount_platform);
+                                    supportLog.setPlatformSurplus(curMonthSupport_platform);
+                                }
+                            } else {
+                                supportLog.setPlatformSupportAmount(supportAmount_platform);
+                                supportLog.setPlatformSurplus(curMonthSupport_platform);
+                            }
+                        } else {
+                            //六月份以后
+                            if (curMonthSupport_platform >= 10000) {
+                                double platform_surplus = curMonthSupport_platform % 10000;
+                                double platform_monthAmount = curMonthSupport_platform - platform_surplus;
+                                supportLog.setPlatformSupportAmount(supportAmount_platform);
+                                supportLog.setPlatformSurplus(platform_surplus);
+                                supportLog.setPlatformMonthAmount(platform_monthAmount - sumMonthAmount_platform);
+                            } else {
+                                supportLog.setPlatformSupportAmount(supportAmount_platform);
+                                supportLog.setPlatformSurplus(curMonthSupport_platform);
+                            }
+                        }
 
-                        Double addedTaxRateValue_platform = rule.getAddedTaxRate() * rule.getGroupRate() * 0.325 / 10000;
-                        Double incomeTaxRateValue_platform = rule.getIncomeTaxRate() * rule.getGroupRate() * 0.2 / 10000;
-                        Double personTaxRateValue_platform = rule.getPersonTaxRate() * rule.getGroupRate() * 0.22 / 10000;
-
-
-                        //截止上月已支付的扶持金
-                        List<EnterpriseSupportLog> supportLogs = enterpriseSupportLogDao.findByEnterpriseNameAndSupportContractIdAndYearAndDateLessThan(supportContract.getEnterpriseName(), supportContract.getContractId(), startYear, curDate);
-                        double last_total_support_platform = supportLogs.stream().collect(Collectors.summarizingDouble(EnterpriseSupportLog::getPlatformSupportAmount)).getSum();
-                        double last_total_support_enterprise = supportLogs.stream().collect(Collectors.summarizingDouble(EnterpriseSupportLog::getSupportAmount)).getSum();
-
-
-                        List<double[]> total_tax_list = enterpriseTaxPlusDao.sumAllTaxByEnterpriseAndDateAndYear(enterprise, curDateStr, startYear);
-
-                        double[] total_tax = total_tax_list.get(0);
-
-                        //按照新的阶梯金额计算截止本月的扶持金
-                        double total_support = total_tax[0] * addedTaxRateValue_platform + total_tax[1] * incomeTaxRateValue_platform + total_tax[2] * personTaxRateValue_platform;
-
-                        double supportAmount_platform = total_support - last_total_support_enterprise - last_total_support_platform - supportLog.getSupportAmount();
-
-
-                        supportLog.setPlatformSupportAmount(supportAmount_platform);
                     }
+
+//                    if (rule_last.getId().equals(rule.getId())) {
+//
+//
+//                        Double addedTaxRateValue_platform = rule.getAddedTaxRate() * rule.getGroupRate() * 0.325 / 10000;
+//                        Double incomeTaxRateValue_platform = rule.getIncomeTaxRate() * rule.getGroupRate() * 0.2 / 10000;
+//                        Double personTaxRateValue_platform = rule.getPersonTaxRate() * rule.getGroupRate() * 0.22 / 10000;
+//
+//
+//                        log.info("企业名称：{}", enterprise);
+//                        log.info("月份：{}", curDateStr);
+//                        log.info("匹配增值税比率：{}", rule.getAddedTaxRate());
+//                        log.info("匹配所得税比率：{}", rule.getIncomeTaxRate());
+//                        log.info("匹配个人所得税比率：{}", rule.getPersonTaxRate());
+//                        log.info("集团率：{}", rule.getGroupRate());
+//                        log.info("增值税计算值：{}", addedTaxRateValue_platform);
+//                        log.info("所得税计算值：{}", incomeTaxRateValue_platform);
+//                        log.info("个人所得税计算值：{}", personTaxRateValue_platform);
+//
+//
+//                        double supportAmount_platform = enterpriseTaxPlus.getAddedTax() * addedTaxRateValue_platform + enterpriseTaxPlus.getIncomeTax() * incomeTaxRateValue_platform + enterpriseTaxPlus.getPersonTax() * personTaxRateValue_platform - supportAmount_base;
+//
+//
+//                        log.info("企业增值税...{}", enterpriseTaxPlus.getAddedTax());
+//                        log.info("所得税...{}", enterpriseTaxPlus.getIncomeTax());
+//                        log.info("个人所得税...{}", enterpriseTaxPlus.getPersonTax());
+//                        log.info("平台当月应获得金额...{}", supportAmount_platform);
+//
+//
+//                        supportLog.setPlatformSupportAmount(supportAmount_platform);
+//
+//                    } else {
+//
+//                        Double addedTaxRateValue_platform = rule.getAddedTaxRate() * rule.getGroupRate() * 0.325 / 10000;
+//                        Double incomeTaxRateValue_platform = rule.getIncomeTaxRate() * rule.getGroupRate() * 0.2 / 10000;
+//                        Double personTaxRateValue_platform = rule.getPersonTaxRate() * rule.getGroupRate() * 0.22 / 10000;
+//
+//
+//                        //截止上月已支付的扶持金
+//                        List<EnterpriseSupportLog> supportLogs = enterpriseSupportLogDao.findByEnterpriseNameAndSupportContractIdAndYearAndDateLessThan(supportContract.getEnterpriseName(), supportContract.getContractId(), startYear, curDate);
+//                        double last_total_support_platform = supportLogs.stream().collect(Collectors.summarizingDouble(EnterpriseSupportLog::getPlatformSupportAmount)).getSum();
+//                        double last_total_support_enterprise = supportLogs.stream().collect(Collectors.summarizingDouble(EnterpriseSupportLog::getSupportAmount)).getSum();
+//
+//
+//                        List<double[]> total_tax_list = enterpriseTaxPlusDao.sumAllTaxByEnterpriseAndDateAndYear(enterprise, curDateStr, startYear);
+//
+//                        double[] total_tax = total_tax_list.get(0);
+//
+//                        //按照新的阶梯金额计算截止本月的扶持金
+//                        double total_support = total_tax[0] * addedTaxRateValue_platform + total_tax[1] * incomeTaxRateValue_platform + total_tax[2] * personTaxRateValue_platform;
+//
+//                        double supportAmount_platform = total_support - last_total_support_enterprise - last_total_support_platform - supportLog.getSupportAmount();
+//
+//
+//                        supportLog.setPlatformSupportAmount(supportAmount_platform);
+//                    }
 
                 }
 
@@ -692,7 +1071,7 @@ public class SupportAgreementServiceImpl implements SupportAgreementService {
                     surplus = surplus - 10000;
                 }
 
-                SupportMonthLog supportMonthLog = SupportMonthLog.builder().garden("天佳经济园").supportId(supportAgreement.getId()).year(enterpriseTax.getYear()).month(enterpriseTax.getMonth()).enterpriseName(enterpriseTax.getEnterpriseName()).supportAreas(supportAgreement.getSupportAreas()).supportProject(supportAgreement.getSupportProject()).supportAmount(convertValue7(supportAmount)).monthAmount(convertValue7(monthAmount)).surplus(convertValue7(surplus)).depositBank(supportAgreement.getDepositBank()).bankAccount(supportAgreement.getBankAccount()).date(enterpriseTax.getDate()).build();
+                SupportMonthLog supportMonthLog = SupportMonthLog.builder().garden("天佳经济区").supportId(supportAgreement.getId()).year(enterpriseTax.getYear()).month(enterpriseTax.getMonth()).enterpriseName(enterpriseTax.getEnterpriseName()).supportAreas(supportAgreement.getSupportAreas()).supportProject(supportAgreement.getSupportProject()).supportAmount(convertValue7(supportAmount)).monthAmount(convertValue7(monthAmount)).surplus(convertValue7(surplus)).depositBank(supportAgreement.getDepositBank()).bankAccount(supportAgreement.getBankAccount()).date(enterpriseTax.getDate()).build();
                 supportMonthLogMapper.insert(supportMonthLog);
             }
         });

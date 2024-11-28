@@ -30,5 +30,8 @@ public class PlatformsContract {
   private String contractName;
   private int cstatus;
   private int cancelDate;
+  private String supportAreas;
+  private String supportProject;
+  private String supportFiles;
 
 }

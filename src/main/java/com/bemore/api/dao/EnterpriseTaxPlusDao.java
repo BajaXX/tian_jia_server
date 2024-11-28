@@ -10,9 +10,13 @@ import java.util.List;
 
 public interface EnterpriseTaxPlusDao extends JpaRepository<EnterpriseTaxPlus, String>, JpaSpecificationExecutor<EnterpriseTaxPlus> {
 
+    List<EnterpriseTaxPlus> findByEnterpriseNameInAndDateBetween(List<String> enterpriseList, String startDate, String endDate);
+
     EnterpriseTax findByEnterpriseNameAndDate(String enterpriseName, String date);
 
+
     List<EnterpriseTaxPlus> findByEnterpriseNameAndDateBetween(String enterpriseName, String max, String min);
+
 
     @Query(nativeQuery = true, value = "select sum(t.total_tax_total) from t_enterprise_tax t where date=:date and enterprise_name in (select enterprise_name from t_support_contract c where c.platform_id=:platformId and is_fund=:isFund and c.status=1)")
     Double sumTaxByPlatformIdAndDate(String platformId, String date,int isFund);

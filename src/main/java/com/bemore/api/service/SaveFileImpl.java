@@ -37,4 +37,5 @@ public interface SaveFileImpl {
      * @return
      */
     String saveCompanyInfoPdf(String path,MultipartFile srcFile) throws IOException;
+    String saveSupportFilesDir(MultipartFile srcFile) throws IOException;
 }

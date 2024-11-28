@@ -30,7 +30,11 @@ public class SupportContract {
   private int createTime;
   private int cancelDate;
   private String contractNo;
+  private String enterpriseNo;
+  private String supportAreas;
+  private String supportProject;
   private String remark;
+  private String supportFiles;
 
 
 

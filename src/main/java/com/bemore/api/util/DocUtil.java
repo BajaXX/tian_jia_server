@@ -265,6 +265,24 @@ public class DocUtil {
         }
         return document;
     }
+    public static Document addSupportInfo(Document document,EnterpriseSupportLog enterpriseSupportLog,int downDate ) {
+        // 将downDate转换为字符串
+        String downDateStr = String.valueOf(downDate);
+
+        // 提取年份部分（前4位）
+        String year = downDateStr.substring(0, 4);
+
+        // 提取月份部分（后2位）
+        String month = downDateStr.substring(4, 6);
+        document.replace("BankAccount", enterpriseSupportLog.getBankAccount(), false, true);
+        document.replace("DepositBank", enterpriseSupportLog.getDepositBank(), false, true);
+        document.replace("support_areas", enterpriseSupportLog.getSupportAreas(), false, true);
+        document.replace("support_month_amount", String.format("%.1f", enterpriseSupportLog.getMonthAmount() / 10000), false, true);
+        document.replace("support_year", year, false, true);
+        document.replace("support_month", month, false, true);
+
+        return document;
+    }
     public static Document addStock2007G(Document document, Person master,PersonLog oldMaster,Enterprise enterprise,List<Member> memberList) {
 
         if(master.getName().equals(oldMaster.getName())){
@@ -1556,6 +1574,93 @@ public class DocUtil {
             params.put("manager", "    ");
             params.put("supervisorChairman", "    ");
         }
+
+        return params;
+    }
+
+    /**
+     * 获取导出文件的参数
+     *
+     * @param enterprise
+     * @return
+     */
+    public static Map<String, String> getDocParams(Enterprise enterprise, Person masterPerson, Person contactor) {
+        HashMap<String, String> params = new HashMap<>();
+        params.put("enterpriseName", enterprise.getName());
+        params.put("year", String.valueOf(LocalDate.now().getYear()));
+        params.put("month", String.valueOf(LocalDate.now().getMonthValue()));
+        params.put("day", String.valueOf(LocalDate.now().getDayOfMonth()));
+
+        //六个月后
+        int six = Integer.valueOf(params.get("month")) + 6;
+        if (six > 12) {
+            params.put("after6Month", six - 12 + "");
+            params.put("afterYear", Integer.valueOf(params.get("year")) + 1 + "");
+        } else {
+            params.put("after6Month", six + "");
+            params.put("afterYear", params.get("year"));
+        }
+
+
+
+
+
+        /**
+         * 受理年月日
+         */
+        params.put("handlerYear", params.get("year"));
+        params.put("handlerMonth", params.get("month"));
+        params.put("handlerDay", params.get("day"));
+
+        /**
+         * 注册号
+         */
+        params.put("registerNum", enterprise.getRegisterNum());
+        /**
+         *法人信息
+         */
+
+        params.put("masterName", masterPerson == null ? "" : masterPerson.getName());
+        params.put("masterPhone", masterPerson == null ? "" : masterPerson.getPhone());
+        params.put("masterMobile", masterPerson == null ? "" : masterPerson.getMobile());
+        params.put("idCardFirst", masterPerson == null ? "" : masterPerson.getFront());
+        params.put("idCardSecond", masterPerson == null ? "" : masterPerson.getBack());
+        params.put("idcard", masterPerson == null ? "" : masterPerson.getIdcard());
+        params.put("masterType", masterPerson == null ? "" : masterPerson.getType());
+        params.put("email", masterPerson == null ? "" : masterPerson.getEmail());
+        params.put("masterAddress", masterPerson == null ? "" : masterPerson.getAddress());
+        params.put("country", masterPerson == null ? "" : masterPerson.getCountry()); // 国别
+        /**
+         * 联系人信息
+         */
+        params.put("contactorName", contactor == null ? "" : contactor.getName());
+        params.put("contactorPhone", contactor == null ? "" : contactor.getPhone());
+        params.put("contactorMobile", contactor == null ? "" : contactor.getMobile());
+        params.put("contactorIdCard", contactor == null ? "" : contactor.getIdcard());
+        params.put("DesignatedContactPhone", enterprise.getDesignatedContactPhone());
+
+
+        params.put("capital", Util.formatDouble(enterprise.getCapital()));
+        params.put("newCapital", Util.formatDouble(enterprise.getCapital()));
+        params.put("realCapital", enterprise.getRealCapital());
+        params.put("contactPhone", enterprise.getContactPhone());
+        params.put("remake", enterprise.getRemake());
+        params.put("actContactAddress", enterprise.getActContactAddress());  // 实际联系地址
+        params.put("zipCode", enterprise.getZipcode());
+
+        //经营范围
+        params.put("business", enterprise.getBusiness());
+        // 所属行业
+        params.put("belongIndustry", enterprise.getBelongIndustry());
+        params.put("introducer", enterprise.getIntroducer());
+        //营业执照的有效期
+        params.put("startDate", enterprise.getStartDate());
+        params.put("endDate", enterprise.getEndDate());
+        //注册地址
+        params.put("registerAddress", Objects.isNull(enterprise.getRegisterAddress()) ? "           " : enterprise.getRegisterAddress());
+        //企业类型
+        params.put("type", enterprise.getType());
+
 
         return params;
     }

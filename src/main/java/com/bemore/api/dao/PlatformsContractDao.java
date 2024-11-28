@@ -19,7 +19,7 @@ public interface PlatformsContractDao extends JpaRepository<PlatformsContract, S
 
     List<PlatformsContract> findAllPlatformsContractByPlatformIdOrderByCstatusAscAgreementStart(@Param("platformId") String platformId);
 
-    List<PlatformsContract> findPlatformsContractsByPlatformIdAndIsFundAndAgreementStartLessThanEqualAndAgreementEndGreaterThanEqual(@Param("platformId") String platformId, @Param("isfund") int isfund, @Param("agreementStart") int agreementStart, @Param("agreementEnd") int agreementEnd);
+    List<PlatformsContract> findPlatformsContractsByPlatformIdAndCstatusAndIsFundAndAgreementStartLessThanEqualAndAgreementEndGreaterThanEqual(@Param("platformId") String platformId,@Param("cstatus") int cstatus, @Param("isfund") int isfund, @Param("agreementStart") int agreementStart, @Param("agreementEnd") int agreementEnd);
 
     @Query("FROM PlatformsContract WHERE platformId=:platformId AND isFund= :isFund AND cstatus=1 AND :curDate BETWEEN agreementStart AND agreementEnd AND taxStart<= :tax AND taxEnd> :tax")
     PlatformsContract getPlatformsContractByPidTax(@Param("platformId") String platformId, @Param("tax") double tax, @Param("isFund") int isFund, @Param("isFund") int curDate);

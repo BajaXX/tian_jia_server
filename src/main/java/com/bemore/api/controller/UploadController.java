@@ -30,37 +30,37 @@ import com.spire.pdf.PdfDocument;
 @RestController
 @RequestMapping("/file")
 public class UploadController {
-	
-	private static final Logger logger = LoggerFactory.getLogger(UploadController.class);
 
-	private String pdfFileDir="//var//www//html//pdf//";
-	private String idcardFileDir="//var//www//html//idcard//";
-	private String bizFileDir="//var//www//html//biz//";
-	private String docFileDir="//var//www//html//doc//";
+    private static final Logger logger = LoggerFactory.getLogger(UploadController.class);
+
+    private String pdfFileDir = "//var//www//html//pdf//";
+    private String idcardFileDir = "//var//www//html//idcard//";
+    private String bizFileDir = "//var//www//html//biz//";
+    private String docFileDir = "//var//www//html//doc//";
 
 //	private String pdfFileDir="D:\\园区\\pdf\\";
 //	private String idcardFileDir="D:\\园区\\idcard\\";
 //	private String bizFileDir="D:\\园区\\biz\\";
 //	private String docFileDir="D:\\园区\\doc\\";
 
-	private static String REGEX_CHINESE = "[\u4e00-\u9fa5]";
-	
-	@Autowired
-	private PersonDao personDao;
-	@Autowired
-	private EnterpriseDao enterpriseDao;
+    private static String REGEX_CHINESE = "[\u4e00-\u9fa5]";
 
-	@Autowired
-	SaveFileImpl saveFile;
-	@Autowired
-	ParseFileService parseFileService;
+    @Autowired
+    private PersonDao personDao;
+    @Autowired
+    private EnterpriseDao enterpriseDao;
 
-	@Autowired
-	FileUpSaveConfig upSaveConfig;
-		
-	@ApiOperation(value = "上传身份证正面")
-	@PostMapping(value = "/uploadFrontIDCard")
-	public Object uploadFrontIDCard(@RequestParam("file")MultipartFile srcFile) {
+    @Autowired
+    SaveFileImpl saveFile;
+    @Autowired
+    ParseFileService parseFileService;
+
+    @Autowired
+    FileUpSaveConfig upSaveConfig;
+
+    @ApiOperation(value = "上传身份证正面")
+    @PostMapping(value = "/uploadFrontIDCard")
+    public Object uploadFrontIDCard(@RequestParam("file") MultipartFile srcFile) {
         try {
 //        	String name = srcFile.getOriginalFilename().substring(0, srcFile.getOriginalFilename().lastIndexOf("."));
 //        	String suffix = srcFile.getOriginalFilename().substring(srcFile.getOriginalFilename().lastIndexOf(".") + 1);
@@ -69,9 +69,9 @@ public class UploadController {
 //			File file = new File(path);
 //			FileUtil.createFile(path);
 //			srcFile.transferTo(file);
-			String pathAndName = saveFile.saveIdCard(upSaveConfig.getIdCardFileDir(), srcFile);
+            String pathAndName = saveFile.saveIdCard(upSaveConfig.getIdCardFileDir(), srcFile);
 
-			// 身份证OCR
+            // 身份证OCR
 //            Credential cred = new Credential("AKIDouoYLkg1tnRuGRFDpJYYdU3OiQt52pJt",
 //            		"dIxOfgRwlOrEQL4XjfHmNjBNL2ZswxiF");
 //            HttpProfile httpProfile = new HttpProfile();
@@ -102,17 +102,17 @@ public class UploadController {
 //	            }
 //	            person.setBirthday(date[0]+"-"+date[1]+"-"+date[2]);
 //            }
-			Person person =parseFileService.idCardFront(pathAndName,new Person());
+            Person person = parseFileService.idCardFront(pathAndName, new Person());
 
-			return GsonUtil.build(person);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new WebException(500,"服务端异常");
-		}
-	}
+            return GsonUtil.build(person);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new WebException(500, "服务端异常");
+        }
+    }
 
-	@PostMapping(value = "/uploadBackIDCard")
-	public Object uploadBackIDCard(@RequestParam("file")MultipartFile srcFile) {
+    @PostMapping(value = "/uploadBackIDCard")
+    public Object uploadBackIDCard(@RequestParam("file") MultipartFile srcFile) {
         try {
 //        	String name = srcFile.getOriginalFilename().substring(0, srcFile.getOriginalFilename().lastIndexOf("."));
 //        	String suffix = srcFile.getOriginalFilename().substring(srcFile.getOriginalFilename().lastIndexOf(".") + 1);
@@ -143,89 +143,70 @@ public class UploadController {
 //	            person.setStartDate(date[0].replaceAll(".", "-"));
 //	            person.setEndDate(date[1].replaceAll(".", "-"));
 //            }
-			String pathAndName = saveFile.saveIdCardReverse(upSaveConfig.getIdCardFileDir(), srcFile);
+            String pathAndName = saveFile.saveIdCardReverse(upSaveConfig.getIdCardFileDir(), srcFile);
 
-			Person person = parseFileService.idCardBack(pathAndName, new Person());
+            Person person = parseFileService.idCardBack(pathAndName, new Person());
 
 
-			return GsonUtil.build(person);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new WebException(500,"服务端异常");
-		}
-	}
-	
-	@PostMapping(value = "/uploadBizLicense")
-	public Object uploadBizLicense(@RequestParam("file")MultipartFile srcFile) {
+            return GsonUtil.build(person);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new WebException(500, "服务端异常");
+        }
+    }
+
+    @PostMapping(value = "/uploadBizLicense")
+    public Object uploadBizLicense(@RequestParam("file") MultipartFile srcFile) {
         try {
-//        	String name = srcFile.getOriginalFilename().substring(0, srcFile.getOriginalFilename().lastIndexOf("."));
-//        	String suffix = srcFile.getOriginalFilename().substring(srcFile.getOriginalFilename().lastIndexOf(".") + 1);
-//			String fileName = System.currentTimeMillis()+"."+suffix;
-//			String path = bizFileDir +fileName ;
-//			File file = new File(path);
-//			FileUtil.createFile(path);
-//			srcFile.transferTo(file);
-//			String pathAndName = saveFile.saveBusinessLicense(upSaveConfig.getBizFileDir(), srcFile);
 
-//			Credential cred = new Credential("AKIDouoYLkg1tnRuGRFDpJYYdU3OiQt52pJt",
-//            		"dIxOfgRwlOrEQL4XjfHmNjBNL2ZswxiF");
-//            HttpProfile httpProfile = new HttpProfile();
-//            httpProfile.setEndpoint("ocr.tencentcloudapi.com");
-//            ClientProfile clientProfile = new ClientProfile();
-//            clientProfile.setHttpProfile(httpProfile);
-//            OcrClient client = new OcrClient(cred, "ap-shanghai", clientProfile);
-//            BizLicenseOCRRequest req = new BizLicenseOCRRequest();
-//            req.setImageUrl("http://52.82.29.181:8091/biz/"+fileName);
-//            BizLicenseOCRResponse resp = client.BizLicenseOCR(req);
-//
-//            Enterprise enterprise = new Enterprise();
-//            enterprise.setName(resp.getName());
-//            enterprise.setType(resp.getType());
-//            enterprise.setBusiness(resp.getBusiness());
-//            enterprise.setRegisterAddress(resp.getAddress());
-//            enterprise.setRegisterNum(resp.getRegNum());
-//            enterprise.setCapital(resp.getCapital().replaceAll(REGEX_CHINESE, ""));
-//            String[] dates = resp.getPeriod().split("至");
-//            enterprise.setStartDate(dates[0].replaceAll(REGEX_CHINESE, "-"));
-//            enterprise.setEndDate(dates[1].replaceAll(REGEX_CHINESE, "-"));
-//            enterprise.setPaperName("http://52.82.29.181:8091/biz/1656126244831.pdf"+fileName);
             String pathAndName = saveFile.saveBusinessLicense(upSaveConfig.getBizFileDir(), srcFile);
             Enterprise enterprise = parseFileService.bizLicense(pathAndName);
-//			Enterprise enterprise = parseFileService.bizLicense(srcFile);
-			return GsonUtil.build(enterprise);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new WebException(500,"服务端异常");
-		}
-	}
+            return GsonUtil.build(enterprise);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new WebException(500, "服务端异常");
+        }
+    }
 
-	@PostMapping(value = "/uploadNewPDF")
-	public Object uploadNewPDF(@RequestParam("file")MultipartFile srcFile) {
-		try {
+    @PostMapping(value = "/uploadSupportFiles")
+    public Object uploadSupportFiles(@RequestParam("file") MultipartFile srcFile) {
+        try {
+
+            String pathAndName = saveFile.saveSupportFilesDir(srcFile);
+            return GsonUtil.build(pathAndName);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new WebException(500, "服务端异常");
+        }
+    }
+
+    @PostMapping(value = "/uploadNewPDF")
+    public Object uploadNewPDF(@RequestParam("file") MultipartFile srcFile) {
+        try {
 //			String name = System.currentTimeMillis() + "";
 //			String fileName = pdfFileDir + name +".pdf";
 //			File file = new File(fileName);
 //			FileUtil.createFile(fileName);
 //			srcFile.transferTo(file);
-			String name = System.currentTimeMillis() + "";
-			String pathAndSave = saveFile.saveCompanyInfoPdf(upSaveConfig.getPdfFileDir() + name + ".pdf", srcFile);
+            String name = System.currentTimeMillis() + "";
+            String pathAndSave = saveFile.saveCompanyInfoPdf(upSaveConfig.getPdfFileDir() + name + ".pdf", srcFile);
 
-			String newFileName = upSaveConfig.getDocFileDir() + name +".docx";
-			PdfDocument pdf = new PdfDocument();
-			pdf.loadFromFile(pathAndSave);
-			pdf.saveToFile(newFileName, FileFormat.DOCX);
+            String newFileName = upSaveConfig.getDocFileDir() + name + ".docx";
+            PdfDocument pdf = new PdfDocument();
+            pdf.loadFromFile(pathAndSave);
+            pdf.saveToFile(newFileName, FileFormat.DOCX);
 
-			Document doc = new Document();
-			doc.loadFromFile(newFileName);
+            Document doc = new Document();
+            doc.loadFromFile(newFileName);
 
-			Enterprise enterprise = new Enterprise();
+            Enterprise enterprise = new Enterprise();
 //			Person person=new Person();
 //			Person person1=new Person();
 //			Person person2=new Person();
-			int index = doc.getSections().get(0).getParagraphs().getCount()-2;
-			String type = doc.getSections().get(0).getParagraphs().get(index).getText();
-			if(type.equals("合伙企业登记（备案）申请书")){
-				enterprise = ParnterPDFOcr.getBasicInfo(newFileName);
+            int index = doc.getSections().get(0).getParagraphs().getCount() - 2;
+            String type = doc.getSections().get(0).getParagraphs().get(index).getText();
+            if (type.equals("合伙企业登记（备案）申请书")) {
+                enterprise = ParnterPDFOcr.getBasicInfo(newFileName);
 ////				财务人员信息
 //				for (int i = 0; i < doc.getSections().get(4).getParagraphs().getCount() - 1; i++) {
 //					String text = doc.getSections().get(4).getParagraphs().get(i).getText();
@@ -334,8 +315,8 @@ public class UploadController {
 //					}
 //				}
 //				personDao.save(person2);
-			}else if(type.equals("个人独资企业登记（备案）申请书")){
-				enterprise = PersonalPDFOcr.getBasicInfo(newFileName);
+            } else if (type.equals("个人独资企业登记（备案）申请书")) {
+                enterprise = PersonalPDFOcr.getBasicInfo(newFileName);
 ////				个独财务信息
 //				for (int i=0;i<doc.getSections().get(0).getParagraphs().getCount()-1;i++) {
 //					String text = doc.getSections().get(0).getParagraphs().get(i).getText();
@@ -422,14 +403,14 @@ public class UploadController {
 //						person2.setIdcard(text.replaceAll("身份证件号码","").trim());
 //					}
 //				}
-			}else{
-				enterprise = LtdPDFOcr.getBasicInfo(newFileName);
-			}
-			return GsonUtil.build(enterprise);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new WebException(500,"服务端异常");
-		}
-	}
-	
+            } else {
+                enterprise = LtdPDFOcr.getBasicInfo(newFileName);
+            }
+            return GsonUtil.build(enterprise);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new WebException(500, "服务端异常");
+        }
+    }
+
 }

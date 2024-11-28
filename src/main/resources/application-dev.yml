@@ -16,7 +16,7 @@ spring:
       max-lifetime: 120000
   jpa:
     database: MYSQL
-    show-sql: true
+    show-sql: false
     hibernate:
       ddl-auto: none
       naming:
@@ -83,6 +83,7 @@ file:
     bizFileDir: D:\workshop\hupiao\files\file\biz\
     bizFileUrl: http://52.82.105.214:8090/file/biz/
     docFileDir: D:\workshop\hupiao\files\file\doc\
+    supportFilesDir: D:\workshop\hupiao\files\file\support\
 company:
   # 企業相關文檔存放路徑 路徑格式：basePath/流轉過程code/企業類型code/文件名
   doc: D:\workshop\hupiao\files\template

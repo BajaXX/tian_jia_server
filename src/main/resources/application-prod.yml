@@ -84,6 +84,7 @@ file:
     bizFileDir: /data/html/file/biz/
     bizFileUrl: http://system.yrdfp.com:8090/file/biz/
     docFileDir: /data/html/file/doc/
+    supportFilesDir: /data/html/file/support/
 company:
   # 企業相關文檔存放路徑 路徑格式：basePath/流轉過程code/企業類型code/文件名
   doc: /data/java/template

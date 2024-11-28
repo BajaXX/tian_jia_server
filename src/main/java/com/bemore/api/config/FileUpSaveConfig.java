@@ -15,4 +15,5 @@ public class FileUpSaveConfig {
     private String bizFileDir;
     private String bizFileUrl;
     private String docFileDir;
+    private String supportFilesDir;
 }

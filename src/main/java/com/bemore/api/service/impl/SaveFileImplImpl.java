@@ -59,4 +59,14 @@ public class SaveFileImplImpl implements SaveFileImpl {
         srcFile.transferTo(file);
         return fileName;
     }
+    @Override
+    public String saveSupportFilesDir( MultipartFile srcFile) throws IOException{
+        String suffix = srcFile.getOriginalFilename().substring(srcFile.getOriginalFilename().lastIndexOf(".") + 1);
+        String fileName = System.currentTimeMillis()+"."+suffix;
+        String filePath = fileUpSaveConfig.getSupportFilesDir() +fileName ;
+        File file = new File(filePath);
+        FileUtil.createFile(filePath);
+        srcFile.transferTo(file);
+        return srcFile.getOriginalFilename()+","+fileName;
+    }
 }

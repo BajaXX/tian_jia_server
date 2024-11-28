@@ -10,4 +10,5 @@ public class downDocReq {
 
     private String filePath;
     private String enterpriseId;
+    private int downDate;
 }

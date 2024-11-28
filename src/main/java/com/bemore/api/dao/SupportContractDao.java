@@ -21,6 +21,9 @@ public interface SupportContractDao extends JpaRepository<SupportContract, Strin
     @Query("SELECT DISTINCT enterpriseName from SupportContract")
     List<String> getSupportEnterpriseList();
 
+    @Query("SELECT DISTINCT enterpriseName from SupportContract WHERE platformId=:platformId AND status=1 AND :curDate BETWEEN startDate AND endDate")
+    List<String> getEnterpriseByPlatformsId(@Param("platformId") String platformId, @Param("curDate") int curDate);
+
     @Query("SELECT DISTINCT enterpriseName from SupportContract where enterpriseName like :keyword")
     List<String> getSupportEnterpriseByName(@Param("keyword") String keyword);
 

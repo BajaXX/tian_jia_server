@@ -5,7 +5,7 @@
 
   <select id="getEnterprise" resultType="com.bemore.api.entity.Enterprise">
     select e.* from t_enterprise e
-    limit #{limit} offset #{offset}
+
     <where>
       <if test="basic.enterpriseNo !=null and basic.enterpriseNo!=''">
         and e.enterprise_no=#{basic.enterpriseNo}
@@ -90,6 +90,7 @@
       </if>
 
     </where>
+     limit #{limit} offset #{offset}
   </select>
 
 

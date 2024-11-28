@@ -1,6 +1,7 @@
 package com.bemore.api.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.bemore.api.config.FileUpSaveConfig;
 import com.bemore.api.constant.CommonConstants;
 import com.bemore.api.constant.ErrorCodeConstants;
 import com.bemore.api.dao.*;
@@ -59,6 +60,15 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Autowired
     private TransferLogDao transferLogDao;
+
+    @Autowired
+    private FileUpSaveConfig fileUpSaveConfig;
+
+    @Autowired
+    private SupportContractDao supportContractDao;
+    @Autowired
+    private EnterpriseSupportLogDao enterpriseSupportLogDao;
+
 
 
     @Override
@@ -363,6 +373,63 @@ public class DocumentServiceImpl implements DocumentService {
             String path = companyDocsBasePath + "/pyc_idcard.png";
             document = DocUtil.addStock1208G(document, stockList, path);
         }
+
+        String fileName = org.apache.commons.lang3.StringUtils.substringBeforeLast(filePath, "\\.");
+
+        DocUtil.DocWriteResponse(fileName, response, document, FileFormat.Doc);
+    }
+
+    @Override
+    public void downloadSupport(String filePath, String enterpriseName,int downDate, HttpServletResponse response) throws WebException {
+        Enterprise enterprise = enterpriseDao.findByName(enterpriseName);
+        if (enterprise == null) throw new WebException(101, "未找到对应企业");
+        String enterpriseId = enterprise.getId();
+
+        //法人
+        Person masterPerson = personDao.findByEnterpriseIdAndIsMaster(enterpriseId, CommonConstants.YesOrNo.YES.getCode());
+
+        //联系人
+        Person contactorPerson = personDao.findByEnterpriseIdAndIsContact(enterpriseId, CommonConstants.YesOrNo.YES.getCode());
+
+
+        Map<String, String> params = DocUtil.getDocParams(enterprise, masterPerson, contactorPerson);
+
+        filePath = fileUpSaveConfig.getSupportFilesDir() + "doc/" + filePath;
+
+        Document document = DocUtil.replace(filePath, params);
+
+
+                //获取三方协议
+        SupportContract supportContract = null;
+
+        EnterpriseSupportLog enterpriseSupportLog=enterpriseSupportLogDao.findByEnterpriseNameAndDate(enterpriseName,downDate);
+
+
+        //1 获取当前企业有效的扶持协议
+        List<SupportContract> supportContractList = supportContractDao.findByEnterpriseNameAndDate(enterpriseName, downDate);
+
+
+
+        if (supportContractList.size() > 1)
+            throw new WebException(101, enterprise + "存在两份有效协议，无法计算，请检查数据。");
+
+        //没数据退出当前循环
+        if (!Objects.isNull(supportContractList) &&  !supportContractList.isEmpty()){
+            supportContract = supportContractList.get(0);
+        }
+
+        if(Objects.isNull(supportContract)){
+            throw new WebException(101, enterprise + "无有效协议，无法计算，请检查数据。");
+        }
+
+        document = DocUtil.addSupportInfo(document, enterpriseSupportLog,downDate);
+
+
+//
+//        if (filePath.contains("青发集团财政专项扶持资金申请表")) {
+//            document = DocUtil.addStock2406G(document, stockList, enterprise.getCapital());
+//        }
+
 
         String fileName = org.apache.commons.lang3.StringUtils.substringBeforeLast(filePath, "\\.");
 

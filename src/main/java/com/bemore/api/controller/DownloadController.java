@@ -1,24 +1,29 @@
 package com.bemore.api.controller;
 
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.bemore.api.config.FileUpSaveConfig;
+import com.bemore.api.dto.req.downDocReq;
+import com.bemore.api.exception.WebException;
+import com.bemore.api.util.DocUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import com.bemore.api.dao.EnterpriseDao;
 import com.bemore.api.dao.FilesDao;
@@ -30,26 +35,30 @@ import com.spire.doc.Document;
 import com.spire.doc.FileFormat;
 import com.spire.doc.Section;
 import com.spire.doc.Table;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/print")
 public class DownloadController {
 
-	private String fileDir = "//var//www//html//files//";
-	
-	@Autowired
-	private EnterpriseDao enterpriseDao;
-	
-	@Autowired
-	private FilesDao filesDao;
-	
-	@PostMapping("/fetchFiles")
-	public String fetchFiles(@RequestParam String id) {
-		Enterprise enterprise = enterpriseDao.findById(id).get();
-		List<Files> files = filesDao.findByEnterpriseTypeAndType(Util.getEnterpriseType(enterprise.getName()), enterprise.getProcess());
-		return GsonUtil.build(files);
-	}
-	
+    private String fileDir = "//var//www//html//files//";
+
+    @Autowired
+    private EnterpriseDao enterpriseDao;
+
+    @Autowired
+    private FilesDao filesDao;
+
+    @Autowired
+    FileUpSaveConfig upSaveConfig;
+
+    @PostMapping("/fetchFiles")
+    public String fetchFiles(@RequestParam String id) {
+        Enterprise enterprise = enterpriseDao.findById(id).get();
+        List<Files> files = filesDao.findByEnterpriseTypeAndType(Util.getEnterpriseType(enterprise.getName()), enterprise.getProcess());
+        return GsonUtil.build(files);
+    }
+
 //	// 获取流程
 //	@GetMapping("/fetch/{id}")
 //	public void fetch(@PathVariable String id, HttpServletResponse response) throws IOException {		
@@ -152,4 +161,93 @@ public class DownloadController {
 //        os.flush();
 //        os.close();
 //	}
+
+
+    // 定义一个GetMapping方法，接收文件的路径作为参数
+    @PostMapping("/download/{fileName:.+}")
+    public void downloadFile(downDocReq req, HttpServletResponse response)  {
+        try{
+
+        // 从文件系统中加载文件作为资源
+        Resource resource = loadFileAsResource(upSaveConfig.getSupportFilesDir(), req.getFilePath());
+
+        // 尝试确定文件的内容类型
+        String contentType = "application/octet-stream";
+//        try {
+//            contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
+//        } catch (IOException ex) {
+//            // 如果无法确定，则使用默认的内容类型
+//            contentType = "application/octet-stream";
+//        }
+
+        // 返回响应实体，设置内容类型和文件名，并将资源作为响应体
+//        return ResponseEntity.ok()
+//                .contentType(MediaType.parseMediaType(contentType))
+//                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + URLEncoder.encode(req.getFilePath(), "UTF-8"))
+//                .body(resource);
+        response.setContentType("application/octet-stream");
+
+        //这后面可以设置导出Excel的名称，此例中名为student.xls
+        response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(req.getFilePath(), "UTF-8"));
+        response.flushBuffer();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    @PostMapping("/download")
+    public ResponseEntity<Resource> downloadFile(downDocReq req, HttpServletRequest request) throws UnsupportedEncodingException {
+        // 对文件名进行解码
+        String decodedFileName = URLDecoder.decode(req.getFilePath(), "UTF-8");
+
+        // 从文件系统中加载文件作为资源
+        Resource resource = loadFileAsResource(upSaveConfig.getSupportFilesDir(), decodedFileName);
+
+        // 尝试确定文件的内容类型
+        String contentType = null;
+        try {
+            contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
+        } catch (IOException ex) {
+            // 如果无法确定，则使用默认的内容类型
+            contentType = "application/octet-stream";
+        }
+
+        // 返回响应实体，设置内容类型和文件名，并将资源作为响应体
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + URLEncoder.encode(decodedFileName, "UTF-8"))
+                .body(resource);
+    }
+
+//    @PostMapping("/downloadFile")
+//    public void downloadFile(downDocReq req, HttpServletResponse response) {
+//        try{
+//
+//            DocUtil.DocWriteResponse(fileName, response, document, FileFormat.Doc);
+//
+//        }catch (WebException e){
+//            throw e;
+//        }
+//    }
+
+    // 定义一个辅助方法，根据文件名加载文件作为资源
+    private Resource loadFileAsResource(String path,String fileName) {
+        try {
+            // 假设文件存储在项目的files目录下，可以根据需要修改
+            Path filePath = Paths.get("files").resolve(path+fileName).normalize();
+            Resource resource = new UrlResource(filePath.toUri());
+            if (resource.exists()) {
+                return resource;
+            } else {
+                // 如果文件不存在，抛出异常
+                throw new RuntimeException("File not found " + fileName);
+            }
+        } catch (MalformedURLException ex) {
+            // 如果文件路径无效，抛出异常
+            throw new RuntimeException("File not found " + fileName, ex);
+        }
+    }
+
+
+
 }

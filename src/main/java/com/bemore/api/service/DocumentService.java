@@ -24,4 +24,6 @@ public interface DocumentService {
      * @param response 响应流
      */
     void downLoadDoc(String filePath, String enterpriseId, HttpServletResponse response) throws WebException;
+
+    void downloadSupport(String filePath, String enterpriseName, int downDate,HttpServletResponse response) throws WebException;
 }
