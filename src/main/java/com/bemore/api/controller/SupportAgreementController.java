@@ -1,6 +1,7 @@
 package com.bemore.api.controller;
 
 import com.bemore.api.dto.req.SupportAgreementReq;
+import com.bemore.api.dto.req.SupportFixDataReq;
 import com.bemore.api.entity.request.SettledQueryParam;
 import com.bemore.api.entity.request.SupportAgreementParam;
 import com.bemore.api.service.SupportAgreementService;
@@ -23,7 +24,6 @@ public class SupportAgreementController {
     public void recalculateSupportAgreement(@RequestBody SupportAgreementReq supportAgreementReq) {
         supportAgreementService.recomputeContract(supportAgreementReq);
     }
-
 
     @GetMapping("/getOne/{id}")
     @ApiOperation(value = "查询单个企业扶持协议")
@@ -57,4 +57,12 @@ public class SupportAgreementController {
         supportAgreementService.saveSupportAgreement(param);
         return GsonUtil.build("success");
     }
+
+    @PostMapping("/fixSupportData")
+    @ApiOperation(value = "修正扶持数据")
+    public String fixSupportData(@RequestBody SupportFixDataReq req) {
+        supportAgreementService.fixSupportData(req);
+        return GsonUtil.build("success");
+    }
+
 }

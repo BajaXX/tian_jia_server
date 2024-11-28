@@ -88,3 +88,4 @@ file:
 company:
   # 企業相關文檔存放路徑 路徑格式：basePath/流轉過程code/企業類型code/文件名
   doc: /data/java/template
+  fixData: /data/java/fixData.json

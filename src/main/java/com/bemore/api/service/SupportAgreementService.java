@@ -2,10 +2,13 @@ package com.bemore.api.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bemore.api.dto.req.SupportAgreementReq;
+import com.bemore.api.dto.req.SupportFixDataReq;
 import com.bemore.api.entity.SupportAgreement;
 import com.bemore.api.entity.request.SettledQueryParam;
 import com.bemore.api.entity.request.SupportAgreementParam;
 import com.bemore.api.entity.response.SupportAgreementView;
+import java.util.List;
+import java.util.Map;
 
 public interface SupportAgreementService {
 
@@ -25,4 +28,7 @@ public interface SupportAgreementService {
     void updateSupportAgreement(SupportAgreementParam param);
 
     void saveSupportAgreement(SupportAgreementParam param);
+
+    void fixSupportData(SupportFixDataReq req);
+
 }

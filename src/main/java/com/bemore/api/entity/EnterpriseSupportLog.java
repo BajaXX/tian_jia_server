@@ -35,5 +35,6 @@ public class EnterpriseSupportLog {
     private String enterpriseNo;
     private String supportAreas;
     private String supportProject;
-
+    @Transient
+    private Double fixValue;
 }

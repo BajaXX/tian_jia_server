@@ -32,9 +32,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.bemore.api.entity.SupportFixData;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+
+@Slf4j
 @RestController
 @RequestMapping("/contract")
 public class SupportContractController {
+
+    @Value("${company.fixData}")
+    private String fixDataPath;
 
     @Autowired
     private PlatformsDao platformsDao;
@@ -62,20 +75,19 @@ public class SupportContractController {
     @Autowired
     private PlatformsSupportLogDao platformsSupportLogDao;
 
-
     @PostMapping("/modifySupportContract")
     @ApiOperation(value = "修改企业扶持协议")
     public String modifySupportAgreement(@RequestBody SupportAgreementParam param) {
         return GsonUtil.build("success");
     }
 
-//    @PostMapping("/addSupportContract")
-//    @ApiOperation(value = "添加企业扶持协议")
-//    public String addSupportAgreement(@RequestBody SupportAgreementParam param) {
-//        return GsonUtil.build("success");
-//    }
+    // @PostMapping("/addSupportContract")
+    // @ApiOperation(value = "添加企业扶持协议")
+    // public String addSupportAgreement(@RequestBody SupportAgreementParam param) {
+    // return GsonUtil.build("success");
+    // }
 
-    ///////////////////////////新接口////////////////////////////////////
+    /////////////////////////// 新接口////////////////////////////////////
     @PostMapping("/addPlatform")
     @ApiOperation(value = "添加平台")
     public String addPlatform(@RequestBody Platforms param) {
@@ -96,7 +108,9 @@ public class SupportContractController {
     @ApiOperation(value = "获取所有平台")
     public String getPlatforms(@RequestBody(required = false) SettledQueryParam param) {
         Sort sort = Sort.by("createTime");
-        ExampleMatcher exampleMatcher = ExampleMatcher.matching().withMatcher("platformName", ExampleMatcher.GenericPropertyMatchers.contains()).withIgnorePaths("createTime").withIgnorePaths("isBase");
+        ExampleMatcher exampleMatcher = ExampleMatcher.matching()
+                .withMatcher("platformName", ExampleMatcher.GenericPropertyMatchers.contains())
+                .withIgnorePaths("createTime").withIgnorePaths("isBase");
         Platforms platforms = new Platforms();
         if (!Objects.isNull(param) && !Objects.isNull(param.getQueryString())) {
             platforms.setPlatformName(param.getQueryString());
@@ -119,16 +133,17 @@ public class SupportContractController {
             contractsList = contractsDao.findAllByContractNameLike("%" + param.getContractName() + "%");
         }
         return GsonUtil.build(contractsList);
-//
-//        List<Contracts> contractsList = contractsDao.findAll();
-//
-//        return GsonUtil.build(contractsList);
+        //
+        // List<Contracts> contractsList = contractsDao.findAll();
+        //
+        // return GsonUtil.build(contractsList);
     }
 
     @PostMapping("/getContractRules")
     @ApiOperation(value = "获取所有协议")
     public String getContractRules(@RequestBody ContractRules contractRules) {
-        List<ContractRules> contractRulesList = contractRulesDao.findAllByContractIdOrderByTaxStart(contractRules.getContractId());
+        List<ContractRules> contractRulesList = contractRulesDao
+                .findAllByContractIdOrderByTaxStart(contractRules.getContractId());
 
         return GsonUtil.build(contractRulesList);
     }
@@ -161,8 +176,9 @@ public class SupportContractController {
     @PostMapping("/addPlatformContract")
     @ApiOperation(value = "添加平台协议")
     public String addPlatformContract(@RequestBody PlatformsContract param) {
-//        //查询协议期是否冲突
-        int count = platformsContractDao.getContractCountByTax(param.getPlatformId(), param.getIsFund(), param.getAgreementStart(), param.getAgreementEnd());
+        // //查询协议期是否冲突
+        int count = platformsContractDao.getContractCountByTax(param.getPlatformId(), param.getIsFund(),
+                param.getAgreementStart(), param.getAgreementEnd());
         if (count > 0) {
             throw new WebException(104, "该平台有未结束的协议，请先作废原协议再新增协议");
         }
@@ -174,8 +190,9 @@ public class SupportContractController {
     @PostMapping("/addContractRule")
     @ApiOperation(value = "添加平台协议")
     public String addContractRule(@RequestBody ContractRules param) {
-        //查询协议期是否冲突
-        int count = contractRulesDao.getContractCountByTax(param.getContractId(), param.getTaxStart(), param.getTaxEnd());
+        // 查询协议期是否冲突
+        int count = contractRulesDao.getContractCountByTax(param.getContractId(), param.getTaxStart(),
+                param.getTaxEnd());
         if (count > 0) {
             throw new WebException(104, "平台协议阶梯不可以有交集");
         }
@@ -186,12 +203,12 @@ public class SupportContractController {
     @PostMapping("/cancelContract")
     @ApiOperation(value = "作废平台协议")
     public String cancelContract(@RequestBody PlatformsContract param) {
-        //查询
+        // 查询
         PlatformsContract platformsContract = platformsContractDao.getOne(param.getId());
         if (Objects.isNull(platformsContract) || platformsContract.getCstatus() != 1) {
             throw new WebException(105, "未找到对应的平台协议，请刷新页面再试。");
         }
-        //todo 需要计算之前的数据
+        // todo 需要计算之前的数据
         DateTime dateTime = new DateTime();
         String date = dateTime.toString("yyyyMMdd");
         platformsContractDao.updateCstatus(param.getId(), 2, Integer.valueOf(date));
@@ -201,12 +218,12 @@ public class SupportContractController {
     @PostMapping("/cancelSupportContract")
     @ApiOperation(value = "作废平台协议")
     public String cancelSupportContract(@RequestBody SupportContract param) {
-        //查询
+        // 查询
         SupportContract supportContract = supportContractDao.getOne(param.getId());
         if (Objects.isNull(supportContract) || supportContract.getStatus() != 1) {
             throw new WebException(105, "未找到对应的企业扶持协议，请刷新页面再试。");
         }
-        //todo 需要计算之前的数据
+        // todo 需要计算之前的数据
         DateTime dateTime = new DateTime();
         String date = dateTime.toString("yyyyMMdd");
         supportContractDao.updateStatus(param.getId(), 2, Integer.valueOf(date));
@@ -221,7 +238,8 @@ public class SupportContractController {
             Sort sort = Sort.by("agreementStart");
             platformsContractList = platformsContractDao.findAll(sort);
         } else {
-            platformsContractList = platformsContractDao.findAllPlatformsContractByPlatformIdOrderByCstatusAscAgreementStart(param.getPlatformId());
+            platformsContractList = platformsContractDao
+                    .findAllPlatformsContractByPlatformIdOrderByCstatusAscAgreementStart(param.getPlatformId());
         }
 
         return GsonUtil.build(platformsContractList);
@@ -236,7 +254,8 @@ public class SupportContractController {
             Sort sort = Sort.by("startDate");
             supportContractList = supportContractDao.findAll(sort);
         } else {
-            supportContractList = supportContractDao.findAllByEnterpriseNameLikeOrderByStatusAscStartDateAsc("%" + param.getEnterpriseName() + "%");
+            supportContractList = supportContractDao
+                    .findAllByEnterpriseNameLikeOrderByStatusAscStartDateAsc("%" + param.getEnterpriseName() + "%");
         }
         return GsonUtil.build(supportContractList);
     }
@@ -257,8 +276,9 @@ public class SupportContractController {
     @PostMapping("/addSupportContract")
     @ApiOperation(value = "添加平台协议")
     public String addSupportContract(@RequestBody SupportContract param) {
-//        //查询协议期是否冲突
-        int count = supportContractDao.getContractCountByDate(param.getEnterpriseName(), param.getStartDate(), param.getEndDate());
+        // //查询协议期是否冲突
+        int count = supportContractDao.getContractCountByDate(param.getEnterpriseName(), param.getStartDate(),
+                param.getEndDate());
         if (count > 0) {
             throw new WebException(104, "该企业有未结束的协议，请先作废原协议再新增协议");
         }
@@ -301,18 +321,43 @@ public class SupportContractController {
     @PostMapping("/getEnterpriseSupportList")
     @ApiOperation(value = "获取企业扶持列表")
     public String getEnterpriseSupportList(@RequestBody SupportAgreementReq supportAgreementReq) {
-
         String enterpriseName = supportAgreementReq.getEnterpriseName();
         int startDate = Integer.valueOf(supportAgreementReq.getStartDate());
         int endDate = Integer.valueOf(supportAgreementReq.getEndDate());
 
-        List<EnterpriseSupportLog> list = new ArrayList<>();
+        // 1. 读取修正数据文件
+        ObjectMapper mapper = new ObjectMapper();
+        List<SupportFixData> fixDataList = new ArrayList<>();
+        try {
+            File file = new File(fixDataPath);
+            if (file.exists() && file.length() > 0) {
+                fixDataList = mapper.readValue(file, new TypeReference<List<SupportFixData>>() {
+                });
+            }
+        } catch (IOException e) {
+            log.error("读取扶持修正数据文件失败", e);
+        }
+
+        // 2. 获取企业支持列表数据
+        List<EnterpriseSupportLog> list;
         if (Objects.nonNull(enterpriseName) && !"".equals(enterpriseName)) {
-            list = enterpriseSupportLogDao.findByEnterpriseNameLikeAndDateGreaterThanEqualAndDateLessThanEqualOrderByDate("%" + supportAgreementReq.getEnterpriseName() + "%", startDate, endDate);
-
+            list = enterpriseSupportLogDao
+                    .findByEnterpriseNameLikeAndDateGreaterThanEqualAndDateLessThanEqualOrderByDate(
+                            "%" + supportAgreementReq.getEnterpriseName() + "%", startDate, endDate);
         } else {
-            list = enterpriseSupportLogDao.findByDateGreaterThanEqualAndDateLessThanEqualOrderByDate(startDate, endDate);
+            list = enterpriseSupportLogDao.findByDateGreaterThanEqualAndDateLessThanEqualOrderByDate(startDate,
+                    endDate);
+        }
 
+        // 3. 为每条记录设置fixValue值
+        for (EnterpriseSupportLog log : list) {
+            String month = String.valueOf(log.getDate()); // 202301
+            Optional<SupportFixData> fixData = fixDataList.stream().filter(
+                    data -> data.getCompanyName().equals(log.getEnterpriseName()) && data.getFixMonth().equals(month)) // 直接比较完整的日期格式
+                    .findFirst();
+
+            // 如果找到修正数据，设置fixValue
+            log.setFixValue(fixData.map(SupportFixData::getFixAmount).orElse(null));
         }
 
         return GsonUtil.build(list);
@@ -321,7 +366,7 @@ public class SupportContractController {
     @PostMapping(value = "/uploadSupportFiles")
     public String uploadSupportFiles(@RequestParam MultipartFile file) {
         System.out.println(file.getName());
-//        enterpriseTaxService.importEnterpriseTaxService(file,date);
+        // enterpriseTaxService.importEnterpriseTaxService(file,date);
         return GsonUtil.build("success");
     }
 
@@ -335,7 +380,8 @@ public class SupportContractController {
 
         List<TPlatformsSupportLog> list = new ArrayList<>();
         if (Objects.nonNull(enterpriseName) && !"".equals(enterpriseName)) {
-            list = platformsSupportLogDao.findAllByPlatformIdAndDateBetweenOrderByDate(supportAgreementReq.getEnterpriseName(), startDate, endDate);
+            list = platformsSupportLogDao.findAllByPlatformIdAndDateBetweenOrderByDate(
+                    supportAgreementReq.getEnterpriseName(), startDate, endDate);
         } else {
             list = platformsSupportLogDao.findAllByDateBetweenOrderByDate(startDate, endDate);
         }
@@ -347,7 +393,7 @@ public class SupportContractController {
     @ApiOperation(value = "获取扶持月度汇总")
     public String getSupportMonth(@RequestBody TaxExportRequest body) {
 
-        int startDate = Integer.valueOf( body.getStartDate());
+        int startDate = Integer.valueOf(body.getStartDate());
 
         List<Object[]> list = enterpriseSupportLogDao.getSupportMonthByDate(startDate);
         List<Object[]> platformlist = platformsSupportLogDao.getSupportMonthByDate(startDate);
